@@ -1,0 +1,161 @@
+# TwinSAFE XML 配置生成器（桌面图形界面）
+
+本项目基于工作目录中的 `safety_ports.json` 与上级目录的 XSD 模式文件，提供一个可视化的 TwinSAFE 安全项目配置工具，最终导出符合 `twincat3-safety-editor_export-format.xsd` 的 `TwinCATExport` XML。
+
+> **注意事项**
+> 1. 生成的 XML 文件格式遵循 Beckhoff `twincat3-safety-editor_xml-import_export` 文档规范，但**未对功能块的使用规则、逻辑合理性等进行校验**。生成的文件导入 TwinCAT 后进行安全编译时，仍可能因功能块配置不当等原因报错，需根据编译提示自行排查。
+> 2. 安全工程中配置的安全设备仅为逻辑层面的定义，**尚未关联到实际硬件设备**。导入 TwinCAT 工程后，需要手动完成安全设备与物理设备的关联映射。
+
+**作者：Will**
+
+## 安全编译环境
+
+本工具生成的 XML 文件面向以下安全编译环境：
+
+| 项目 | 版本 |
+|------|------|
+| **安全软件** | Beckhoff TE9000 |
+| **版本** | 1.4.16 |
+
+> **注意**：生成的 XML 文件需要在 TE9000 1.4.16 环境下进行安全编译。不同版本的 TE9000 可能存在导出格式差异，请确保使用匹配的版本。
+
+## 运行环境
+
+| 依赖 | 要求 |
+|------|------|
+| **Python** | 3.9+ |
+| **tkinter** | 内置（通常随 Python 一起安装） |
+| **操作系统** | Windows（推荐）/ Linux / macOS |
+| **可选** | `xmlschema` 或 `lxml`（用于完整 XSD 校验） |
+
+### 安装
+
+无需额外安装依赖，Python 自带 `tkinter` 即可运行：
+
+```bash
+python main.py
+```
+
+如需完整 XSD 校验功能：
+
+```bash
+pip install xmlschema
+```
+
+## 使用说明
+
+### 界面概览
+
+界面包含以下标签页：
+- **项目信息**：填写项目名称、作者、目标系统类型/子类型、SafeAddress 等。
+- **TwinSAFE 组**：添加/删除 TwinSAFE Group，设置组级选项。
+- **功能块**：在选定组内添加 FB（自动从 `safety_ports.json` 填充端口），修改属性。
+- **别名设备**：管理安全别名设备，支持配置安全 IO（RxPdo/TxPdo）。
+
+### 操作流程
+
+1. **配置项目信息**：在"项目信息"页填写项目名称、作者、目标系统类型等。
+2. **创建 TwinSAFE 组**：在"TwinSAFE 组"页添加组，设置组属性。
+3. **添加安全别名设备**：在"别名设备"页添加设备（从下拉列表选择型号），配置别名、SafeAddress、Watchdog。
+4. **添加功能块**：在"功能块"页选择 FB 类型添加，配置引脚关联通道。
+5. **生成 XML**：点击底部"生成 XML"按钮导出。
+
+### 生成 XML
+
+点击界面底部 **生成 XML**，选择保存路径，即可导出 `TwinCATExport` XML。
+
+### 导入 TwinCAT Safety Editor
+
+生成的 XML 文件可通过 TwinCAT3 Safety Editor 的导入功能加载到安全工程中。详细步骤参见 Beckhoff 文档 `twincat3-safety-editor_xml-import_export` 第 6.1.2 节。
+
+**导入注意事项：**
+- 导入前请确保 Safety Editor 版本为 **TE9000 1.4.16**，以保证格式兼容性
+- 导入后需要在 Safety Editor 中**手动完成安全设备与物理硬件的关联映射**
+- 导入后请执行**安全编译**（Safety Build），根据编译提示排查可能的逻辑配置问题
+- 若导入失败，请检查 XML 文件是否完整、格式是否符合 XSD 规范
+
+## 目录结构
+
+```
+demo/
+├── main.py                 # 程序入口
+├── gui.py                  # tkinter 桌面界面
+├── config_model.py         # 项目配置数据模型
+├── beckhoff_io_library.py  # 倍福安全 IO 设备库
+├── port_library.py         # safety_ports.json 端口库封装
+├── xml_generator.py        # 按 XSD 结构生成 XML
+├── xsd_validator.py        # XSD 校验（优先 xmlschema/lxml，否则内置结构校验）
+├── json_parser.py          # 原有 JSON 解析器（保留）
+├── test_json.py            # 原有测试脚本（保留）
+├── safety_ports.json       # FB / Group 端口定义库
+├── example_project.json    # 示例项目配置（含安全IO配置）
+├── example_export.xml      # 示例生成的 XML
+└── README.md               # 本说明
+```
+
+## 主要功能
+
+### 倍福安全 IO 设备选择
+
+在 **别名设备** 配置对话框中，可从预定义的倍福安全 IO 设备库中选择设备型号，自动填充设备参数和安全 IO 配置。
+
+**支持的设备型号：**
+
+| 型号 | 描述 | 通道数 |
+|------|------|--------|
+| **EL1904** | 4通道数字量安全输入 | 4 DI + 状态/通信 |
+| **EL2904** | 4通道数字量安全输出 | 4 DO + 状态/通信 |
+| **EL1918** | 8通道数字量安全输入（带通道诊断） | 8 DI + 状态/通信 |
+| **EP1918** | 8通道数字量安全输入（带通道诊断） | 8 DI + 状态/通信 |
+| **EP1957** | 8通道数字量安全输入 + 4通道数字量安全输出 | 8 DI + 4 DO |
+| **EP2918** | 8通道数字量安全输出（带通道诊断） | 8 DO + 状态/通信 |
+
+**使用方法：**
+1. 在 **别名设备** 标签页点击 **添加安全别名设备**
+2. 在对话框顶部 **设备型号** 下拉框中选择设备型号（仅显示型号）
+3. 系统自动填充设备参数和安全 IO 配置
+4. 根据需要修改别名、SafeAddress、Watchdog 后点击确定
+
+### 安全 PLC 双模式
+
+EL1918、EP1918、EP1957、EP2918 支持两种使用模式：
+
+1. **作为安全 PLC**：选择为目标系统类型时，自动创建 Local 连接类型的安全别名设备（SafeAddress=0）
+2. **作为别名设备**：作为安全 IO 设备添加到组中
+
+### 功能块引脚关联
+
+功能块引脚支持关联安全别名设备的通道：
+- **输入引脚**：单选关联输入通道（RxPdo）
+- **输出引脚**：多选关联输出通道（TxPdo）
+
+### 自动创建的系统设备
+
+每个 TwinSAFE 组自动创建以下系统设备（不可编辑/删除）：
+- **ErrorAcknowledgement**：错误确认信号
+- **Run**：运行信号
+
+## 配置文件保存
+
+通过菜单 **文件 → 保存项目 JSON**，当前项目结构会保存为 JSON；下次可通过 **打开项目 JSON** 继续编辑。
+
+## 设计要点
+
+- 严格遵循 XSD 元素顺序（`TwinCATExport` → `GeneralInformation` → `TargetSystemConfiguration` → `ApplicationConfiguration`）。
+- `FunctionBlock` 的设置字段仅当配置中提供时才输出。
+- `PortId` 使用 `safety_ports.json` 中的十六进制值，符合 XSD `HexDecUInt32Value` 类型。
+- 空的可选元素会被省略，避免 XSD 顺序/空值问题。
+- 安全 IO 配置（RxPdo/TxPdo）按 XSD `ProcessImage` 类型实现。
+- ID 自动生成规则遵循 PDF 7.2 规范。
+
+## 依赖
+
+- Python 3.9+
+- 内置 `tkinter`
+- 可选：`xmlschema` 或 `lxml`（完整 XSD 校验）
+
+---
+
+## 免责声明
+
+本工具仅供学习和工程辅助使用，生成的 XML 文件不保证在所有场景下均能通过安全编译。使用本工具生成的配置文件所产生的任何直接或间接损失，作者不承担任何责任。在实际安全工程中使用前，请务必进行充分的测试和验证，确保满足相关安全标准和规范要求。

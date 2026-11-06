@@ -1,0 +1,441 @@
+{
+  "group_ports": {
+    "imports": {
+      "RunStop":     { "hex": "0x01010000", "dec": 16842752 },
+      "ErrAck":      { "hex": "0x01020000", "dec": 16908288 },
+      "ModuleFault": { "hex": "0x01030000", "dec": 16973824 }
+    },
+    "outputs": {
+      "FbErr":        { "hex": "0x02010000", "dec": 33619968 },
+      "ComErr":       { "hex": "0x02020000", "dec": 33685504 },
+      "OutErr":       { "hex": "0x02030000", "dec": 33751040 },
+      "GroupOutErr":  { "hex": "0x02040000", "dec": 33816576 },
+      "ComStartup":   { "hex": "0x02050000", "dec": 33882112 },
+      "FbDeactive":   { "hex": "0x02060000", "dec": 33947648 },
+      "FbRun":        { "hex": "0x02070000", "dec": 34013184 },
+      "InRun":        { "hex": "0x02080000", "dec": 34078720 }
+    }
+  },
+
+  "function_blocks": {
+    "FBEstop": {
+      "type": 32, "subtype": "0x20", "subtype_dec": 32,
+      "ports": {
+        "Restart":     { "dir": "in",  "hex": "0x01000020", "dec": 16777248 },
+        "EDM1":        { "dir": "in",  "hex": "0x01010020", "dec": 16842784 },
+        "EDM2":        { "dir": "in",  "hex": "0x01020020", "dec": 16908320 },
+        "EStopIn1":    { "dir": "in",  "hex": "0x01080020", "dec": 17301536 },
+        "EStopIn2":    { "dir": "in",  "hex": "0x01090020", "dec": 17367072 },
+        "EStopIn3":    { "dir": "in",  "hex": "0x010a0020", "dec": 17432608 },
+        "EStopIn4":    { "dir": "in",  "hex": "0x010b0020", "dec": 17498144 },
+        "EStopIn5":    { "dir": "in",  "hex": "0x010c0020", "dec": 17563680 },
+        "EStopIn6":    { "dir": "in",  "hex": "0x010d0020", "dec": 17629216 },
+        "EStopIn7":    { "dir": "in",  "hex": "0x010e0020", "dec": 17694752 },
+        "EStopIn8":    { "dir": "in",  "hex": "0x010f0020", "dec": 17760288 },
+        "Error":       { "dir": "out", "hex": "0x02000020", "dec": 33554464 },
+        "EStopOut":    { "dir": "out", "hex": "0x02010020", "dec": 33620000 },
+        "EStopDelOut": { "dir": "out", "hex": "0x02020020", "dec": 33685536 }
+      }
+    },
+    "FBMon": {
+      "type": 33, "subtype": "0x21", "subtype_dec": 33,
+      "ports": {
+        "Restart":  { "dir": "in",  "hex": "0x01000021", "dec": 16777249 },
+        "EDM1":     { "dir": "in",  "hex": "0x01010021", "dec": 16842785 },
+        "EDM2":     { "dir": "in",  "hex": "0x01020021", "dec": 16908321 },
+        "MonIn1":   { "dir": "in",  "hex": "0x01080021", "dec": 17301537 },
+        "MonIn2":   { "dir": "in",  "hex": "0x01090021", "dec": 17367073 },
+        "MonIn3":   { "dir": "in",  "hex": "0x010a0021", "dec": 17432609 },
+        "MonIn4":   { "dir": "in",  "hex": "0x010b0021", "dec": 17498145 },
+        "Secure1":  { "dir": "in",  "hex": "0x010c0021", "dec": 17563681 },
+        "Secure2":  { "dir": "in",  "hex": "0x010d0021", "dec": 17629217 },
+        "Error":    { "dir": "out", "hex": "0x02000021", "dec": 33554465 },
+        "MonOut":   { "dir": "out", "hex": "0x02010021", "dec": 33620001 },
+        "MonDelOut":{ "dir": "out", "hex": "0x02020021", "dec": 33685537 }
+      }
+    },
+    "FBAnd": {
+      "type": 34, "subtype": "0x22", "subtype_dec": 34,
+      "ports": {
+        "AndIn1": { "dir": "in",  "hex": "0x01080022", "dec": 17301538 },
+        "AndIn2": { "dir": "in",  "hex": "0x01090022", "dec": 17367074 },
+        "AndIn3": { "dir": "in",  "hex": "0x010a0022", "dec": 17432610 },
+        "AndIn4": { "dir": "in",  "hex": "0x010b0022", "dec": 17498146 },
+        "AndIn5": { "dir": "in",  "hex": "0x010c0022", "dec": 17563682 },
+        "AndIn6": { "dir": "in",  "hex": "0x010d0022", "dec": 17629218 },
+        "AndIn7": { "dir": "in",  "hex": "0x010e0022", "dec": 17694754 },
+        "AndIn8": { "dir": "in",  "hex": "0x010f0022", "dec": 17760290 },
+        "AndOut": { "dir": "out", "hex": "0x02010022", "dec": 33620002 }
+      }
+    },
+    "FBOr": {
+      "type": 35, "subtype": "0x23", "subtype_dec": 35,
+      "ports": {
+        "OrIn1": { "dir": "in",  "hex": "0x01080023", "dec": 17301539 },
+        "OrIn2": { "dir": "in",  "hex": "0x01090023", "dec": 17367075 },
+        "OrIn3": { "dir": "in",  "hex": "0x010a0023", "dec": 17432611 },
+        "OrIn4": { "dir": "in",  "hex": "0x010b0023", "dec": 17498147 },
+        "OrIn5": { "dir": "in",  "hex": "0x010c0023", "dec": 17563683 },
+        "OrIn6": { "dir": "in",  "hex": "0x010d0023", "dec": 17629219 },
+        "OrIn7": { "dir": "in",  "hex": "0x010e0023", "dec": 17694755 },
+        "OrIn8": { "dir": "in",  "hex": "0x010f0023", "dec": 17760291 },
+        "OrOut": { "dir": "out", "hex": "0x02010023", "dec": 33620003 }
+      }
+    },
+    "FBDecouple": {
+      "type": 36, "subtype": "0x24", "subtype_dec": 36,
+      "ports": {
+        "Decin1":  { "dir": "in",  "hex": "0x01080024", "dec": 17301540 },
+        "Decin2":  { "dir": "in",  "hex": "0x01090024", "dec": 17367076 },
+        "Decin3":  { "dir": "in",  "hex": "0x010a0024", "dec": 17432612 },
+        "Decin4":  { "dir": "in",  "hex": "0x010b0024", "dec": 17498148 },
+        "Decin5":  { "dir": "in",  "hex": "0x010c0024", "dec": 17563684 },
+        "Decin6":  { "dir": "in",  "hex": "0x010d0024", "dec": 17629220 },
+        "Decin7":  { "dir": "in",  "hex": "0x010e0024", "dec": 17694756 },
+        "Decin8":  { "dir": "in",  "hex": "0x010f0024", "dec": 17760292 },
+        "DecOut1": { "dir": "out", "hex": "0x02080024", "dec": 34078756 },
+        "DecOut2": { "dir": "out", "hex": "0x02090024", "dec": 34144292 },
+        "DecOut3": { "dir": "out", "hex": "0x020a0024", "dec": 34209828 },
+        "DecOut4": { "dir": "out", "hex": "0x020b0024", "dec": 34275364 },
+        "DecOut5": { "dir": "out", "hex": "0x020c0024", "dec": 34340900 },
+        "DecOut6": { "dir": "out", "hex": "0x020d0024", "dec": 34406436 },
+        "DecOut7": { "dir": "out", "hex": "0x020e0024", "dec": 34471972 },
+        "DecOut8": { "dir": "out", "hex": "0x020f0024", "dec": 34537508 }
+      }
+    },
+    "FBOpmode": {
+      "type": 37, "subtype": "0x25", "subtype_dec": 37,
+      "ports": {
+        "Restart": { "dir": "in",  "hex": "0x01000025", "dec": 16777253 },
+        "OpIn1":   { "dir": "in",  "hex": "0x01080025", "dec": 17301541 },
+        "OpIn2":   { "dir": "in",  "hex": "0x01090025", "dec": 17367077 },
+        "OpIn3":   { "dir": "in",  "hex": "0x010a0025", "dec": 17432613 },
+        "OpIn4":   { "dir": "in",  "hex": "0x010b0025", "dec": 17498149 },
+        "OpIn5":   { "dir": "in",  "hex": "0x010c0025", "dec": 17563685 },
+        "OpIn6":   { "dir": "in",  "hex": "0x010d0025", "dec": 17629221 },
+        "OpIn7":   { "dir": "in",  "hex": "0x010e0025", "dec": 17694757 },
+        "OpIn8":   { "dir": "in",  "hex": "0x010f0025", "dec": 17760293 },
+        "Error":   { "dir": "out", "hex": "0x02000025", "dec": 33554469 },
+        "OpOut1":  { "dir": "out", "hex": "0x02080025", "dec": 34078757 },
+        "OpOut2":  { "dir": "out", "hex": "0x02090025", "dec": 34144293 },
+        "OpOut3":  { "dir": "out", "hex": "0x020a0025", "dec": 34209829 },
+        "OpOut4":  { "dir": "out", "hex": "0x020b0025", "dec": 34275365 },
+        "OpOut5":  { "dir": "out", "hex": "0x020c0025", "dec": 34340901 },
+        "OpOut6":  { "dir": "out", "hex": "0x020d0025", "dec": 34406437 },
+        "OpOut7":  { "dir": "out", "hex": "0x020e0025", "dec": 34471973 },
+        "OpOut8":  { "dir": "out", "hex": "0x020f0025", "dec": 34537509 }
+      }
+    },
+    "FBTwohand": {
+      "type": 38, "subtype": "0x26", "subtype_dec": 38,
+      "ports": {
+        "TwoHand1":   { "dir": "in",  "hex": "0x01080026", "dec": 17301542 },
+        "TwoHand2":   { "dir": "in",  "hex": "0x01090026", "dec": 17367078 },
+        "TwoHand3":   { "dir": "in",  "hex": "0x010a0026", "dec": 17432614 },
+        "TwoHand4":   { "dir": "in",  "hex": "0x010b0026", "dec": 17498150 },
+        "Error":      { "dir": "out", "hex": "0x02000026", "dec": 33554470 },
+        "TwoHandOut": { "dir": "out", "hex": "0x02010026", "dec": 33620006 }
+      }
+    },
+    "FBEdm": {
+      "type": 39, "subtype": "0x27", "subtype_dec": 39,
+      "ports": {
+        "Mon1":  { "dir": "in",  "hex": "0x01080027", "dec": 17301543 },
+        "Mon2":  { "dir": "in",  "hex": "0x01090027", "dec": 17367079 },
+        "Error": { "dir": "out", "hex": "0x02000027", "dec": 33554471 }
+      }
+    },
+    "FBMuting": {
+      "type": 40, "subtype": "0x28", "subtype_dec": 40,
+      "ports": {
+        "Enable":      { "dir": "in",  "hex": "0x01000028", "dec": 16777256 },
+        "EDM1":        { "dir": "in",  "hex": "0x01010028", "dec": 16842792 },
+        "EDM2":        { "dir": "in",  "hex": "0x01020028", "dec": 16908328 },
+        "MutingIn1":   { "dir": "in",  "hex": "0x01080028", "dec": 17301544 },
+        "MutingIn2":   { "dir": "in",  "hex": "0x01090028", "dec": 17367080 },
+        "OSSDIn1":     { "dir": "in",  "hex": "0x010a0028", "dec": 17432616 },
+        "OSSDIn2":     { "dir": "in",  "hex": "0x010b0028", "dec": 17498152 },
+        "MutingIn3":   { "dir": "in",  "hex": "0x010c0028", "dec": 17563688 },
+        "MutingIn4":   { "dir": "in",  "hex": "0x010d0028", "dec": 17629224 },
+        "Error":       { "dir": "out", "hex": "0x02000028", "dec": 33554472 },
+        "MutingActive":{ "dir": "out", "hex": "0x02010028", "dec": 33620008 },
+        "MuteOut":     { "dir": "out", "hex": "0x02020028", "dec": 33685544 },
+        "MuteDelOut":  { "dir": "out", "hex": "0x02030028", "dec": 33751080 }
+      }
+    },
+    "FBRs": {
+      "type": 41, "subtype": "0x29", "subtype_dec": 41,
+      "ports": {
+        "Reset": { "dir": "in",  "hex": "0x01080029", "dec": 17301545 },
+        "Set":   { "dir": "in",  "hex": "0x01090029", "dec": 17367081 },
+        "RsOut": { "dir": "out", "hex": "0x02000029", "dec": 33554473 }
+      }
+    },
+    "FBSr": {
+      "type": 42, "subtype": "0x2a", "subtype_dec": 42,
+      "ports": {
+        "Set":   { "dir": "in",  "hex": "0x0109002a", "dec": 17367082 },
+        "Reset": { "dir": "in",  "hex": "0x0108002a", "dec": 17301546 },
+        "SrOut": { "dir": "out", "hex": "0x0200002a", "dec": 33554474 }
+      }
+    },
+    "FBTof": {
+      "type": 43, "subtype": "0x2b", "subtype_dec": 43,
+      "ports": {
+        "TofIn":  { "dir": "in",  "hex": "0x0108002b", "dec": 17301547 },
+        "TofOut": { "dir": "out", "hex": "0x0201002b", "dec": 33620011 }
+      }
+    },
+    "FBTon": {
+      "type": 44, "subtype": "0x2c", "subtype_dec": 44,
+      "ports": {
+        "TonIn":  { "dir": "in",  "hex": "0x0108002c", "dec": 17301548 },
+        "TonOut": { "dir": "out", "hex": "0x0201002c", "dec": 33620012 }
+      }
+    },
+    "FBTon2": {
+      "type": 4402, "subtype": "0x1132", "subtype_dec": 4402,
+      "ports": {
+        "TonIn":  { "dir": "in",  "hex": "0x01081132", "dec": 17305906 },
+        "Enable": { "dir": "in",  "hex": "0x01091132", "dec": 17371442 },
+        "TonOut": { "dir": "out", "hex": "0x02011132", "dec": 33624370 }
+      }
+    },
+    "FBConnShutdown": {
+      "type": 45, "subtype": "0x2d", "subtype_dec": 45,
+      "ports": {
+        "Deactivate1": { "dir": "in",  "hex": "0x0108002d", "dec": 17301549 },
+        "Deactivate2": { "dir": "in",  "hex": "0x0109002d", "dec": 17367085 },
+        "Error":       { "dir": "out", "hex": "0x0200002d", "dec": 33554477 },
+        "Deactivated": { "dir": "out", "hex": "0x0201002d", "dec": 33620013 }
+      }
+    },
+    "FBXor": {
+      "type": 46, "subtype": "0x2e", "subtype_dec": 46,
+      "ports": {
+        "XorIn1":  { "dir": "in",  "hex": "0x0108002e", "dec": 17301550 },
+        "XorIn2":  { "dir": "in",  "hex": "0x0109002e", "dec": 17367086 },
+        "XorIn3":  { "dir": "in",  "hex": "0x010a002e", "dec": 17432622 },
+        "XorIn4":  { "dir": "in",  "hex": "0x010b002e", "dec": 17498158 },
+        "XorIn5":  { "dir": "in",  "hex": "0x010c002e", "dec": 17563694 },
+        "XorIn6":  { "dir": "in",  "hex": "0x010d002e", "dec": 17629230 },
+        "XorIn7":  { "dir": "in",  "hex": "0x010e002e", "dec": 17694766 },
+        "XorIn8":  { "dir": "in",  "hex": "0x010f002e", "dec": 17760302 },
+        "XorOut1": { "dir": "out", "hex": "0x0208002e", "dec": 34078766 },
+        "XorOut2": { "dir": "out", "hex": "0x0209002e", "dec": 34144302 },
+        "XorOut3": { "dir": "out", "hex": "0x020a002e", "dec": 34209838 },
+        "XorOut4": { "dir": "out", "hex": "0x020b002e", "dec": 34275374 },
+        "XorOut5": { "dir": "out", "hex": "0x020c002e", "dec": 34340910 },
+        "XorOut6": { "dir": "out", "hex": "0x020d002e", "dec": 34406446 },
+        "XorOut7": { "dir": "out", "hex": "0x020e002e", "dec": 34471982 },
+        "XorOut8": { "dir": "out", "hex": "0x020f002e", "dec": 34537518 }
+      }
+    },
+    "FBCompare": {
+      "type": 64, "subtype": "0x40", "subtype_dec": 64,
+      "ports": {
+        "CompIn1": { "dir": "in",  "hex": "0x01100040", "dec": 17825856 },
+        "CompIn2": { "dir": "in",  "hex": "0x01110040", "dec": 17891392 },
+        "CompIn3": { "dir": "in",  "hex": "0x01120040", "dec": 17956928 },
+        "CompIn4": { "dir": "in",  "hex": "0x01130040", "dec": 18022464 },
+        "CompIn5": { "dir": "in",  "hex": "0x01140040", "dec": 18088000 },
+        "Error":   { "dir": "out", "hex": "0x02000040", "dec": 33554496 },
+        "CompOut": { "dir": "out", "hex": "0x02010040", "dec": 34603072 }
+      }
+    },
+    "FBAdd": {
+      "type": 65, "subtype": "0x41", "subtype_dec": 65,
+      "ports": {
+        "AnalogIn1": { "dir": "in",  "hex": "0x01100041", "dec": 17825857 },
+        "AnalogIn2": { "dir": "in",  "hex": "0x01110041", "dec": 17891393 },
+        "Error":     { "dir": "out", "hex": "0x02000041", "dec": 33554497 },
+        "AnalogOut": { "dir": "out", "hex": "0x02100041", "dec": 34603073 }
+      }
+    },
+    "FBSub": {
+      "type": 66, "subtype": "0x42", "subtype_dec": 66,
+      "ports": {
+        "AnalogIn1": { "dir": "in",  "hex": "0x01100042", "dec": 17825858 },
+        "AnalogIn2": { "dir": "in",  "hex": "0x01110042", "dec": 17891394 },
+        "Error":     { "dir": "out", "hex": "0x02000042", "dec": 33554498 },
+        "AnalogOut": { "dir": "out", "hex": "0x02100042", "dec": 34603074 }
+      }
+    },
+    "FBMul": {
+      "type": 67, "subtype": "0x43", "subtype_dec": 67,
+      "ports": {
+        "AnalogIn1": { "dir": "in",  "hex": "0x01100043", "dec": 17825859 },
+        "AnalogIn2": { "dir": "in",  "hex": "0x01110043", "dec": 17891395 },
+        "Error":     { "dir": "out", "hex": "0x02000043", "dec": 33554499 },
+        "AnalogOut": { "dir": "out", "hex": "0x02100043", "dec": 34603075 }
+      }
+    },
+    "FBDiv": {
+      "type": 68, "subtype": "0x44", "subtype_dec": 68,
+      "ports": {
+        "AnalogIn1": { "dir": "in",  "hex": "0x01100044", "dec": 17825860 },
+        "AnalogIn2": { "dir": "in",  "hex": "0x01110044", "dec": 17891396 },
+        "Error":     { "dir": "out", "hex": "0x02000044", "dec": 33554500 },
+        "AnalogOut": { "dir": "out", "hex": "0x02100044", "dec": 34603076 }
+      }
+    },
+    "FBCounter": {
+      "type": 69, "subtype": "0x45", "subtype_dec": 69,
+      "ports": {
+        "Reset":      { "dir": "in",  "hex": "0x01000045", "dec": 16777285 },
+        "CountUp":    { "dir": "in",  "hex": "0x01010045", "dec": 16842821 },
+        "CountDown":  { "dir": "in",  "hex": "0x01020045", "dec": 16908357 },
+        "Error":      { "dir": "out", "hex": "0x02000045", "dec": 33554501 },
+        "CounterOut": { "dir": "out", "hex": "0x02010045", "dec": 33620037 },
+        "CounterZero":{ "dir": "out", "hex": "0x02020045", "dec": 33685573 },
+        "ActValue":   { "dir": "out", "hex": "0x02100045", "dec": 34603077 }
+      }
+    },
+    "FBLimit": {
+      "type": 70, "subtype": "0x46", "subtype_dec": 70,
+      "ports": {
+        "AnalogIn": { "dir": "in",  "hex": "0x01100046", "dec": 17825862 },
+        "MinValue": { "dir": "in",  "hex": "0x01110046", "dec": 17891398 },
+        "MaxValue": { "dir": "in",  "hex": "0x01120046", "dec": 17956934 },
+        "Error":    { "dir": "out", "hex": "0x02000046", "dec": 33554502 },
+        "InLimit":  { "dir": "out", "hex": "0x02010046", "dec": 33620038 },
+        "BelowMin": { "dir": "out", "hex": "0x02020046", "dec": 33685574 },
+        "AboveMax": { "dir": "out", "hex": "0x02030046", "dec": 33751110 }
+      }
+    },
+    "FBScaling": {
+      "type": 71, "subtype": "0x47", "subtype_dec": 71,
+      "ports": {
+        "AnalogIn":     { "dir": "in",  "hex": "0x01100047", "dec": 17825863 },
+        "Error":        { "dir": "out", "hex": "0x02000047", "dec": 33554503 },
+        "AnalogOut":    { "dir": "out", "hex": "0x02100047", "dec": 34603079 },
+        "StuckAtError": { "dir": "out", "hex": "0x02010047", "dec": 33620039 }
+      }
+    },
+    "FBCamMonitor": {
+      "type": 72, "subtype": "0x48", "subtype_dec": 72,
+      "ports": {
+        "Automatic":       { "dir": "in",  "hex": "0x01000048", "dec": 16777288 },
+        "BackwardsMove":   { "dir": "in",  "hex": "0x01010048", "dec": 16842824 },
+        "Reset":           { "dir": "in",  "hex": "0x01020048", "dec": 16908360 },
+        "PressStarted":    { "dir": "in",  "hex": "0x01030048", "dec": 16973896 },
+        "OverrunCAM":      { "dir": "in",  "hex": "0x01040048", "dec": 17039432 },
+        "UpwardCAM":       { "dir": "in",  "hex": "0x01050048", "dec": 17104968 },
+        "SettingMode":     { "dir": "in",  "hex": "0x01060048", "dec": 17170504 },
+        "Position":        { "dir": "in",  "hex": "0x01100048", "dec": 17825864 },
+        "TDC1-Lower Limit":{ "dir": "in",  "hex": "0x01110048", "dec": 17891400 },
+        "TDC1-Upper Limit":{ "dir": "in",  "hex": "0x01120048", "dec": 17956936 },
+        "TDC2-Lower Limit":{ "dir": "in",  "hex": "0x01130048", "dec": 18022472 },
+        "TDC2-Upper Limit":{ "dir": "in",  "hex": "0x01140048", "dec": 18088008 },
+        "BDC-Lower Limit": { "dir": "in",  "hex": "0x01150048", "dec": 18153544 },
+        "BDC-Upper Limit": { "dir": "in",  "hex": "0x01160048", "dec": 18219080 },
+        "OverrunMax":      { "dir": "in",  "hex": "0x01170048", "dec": 18284616 },
+        "Error":           { "dir": "out", "hex": "0x02000048", "dec": 33554504 },
+        "CAMMonOk":        { "dir": "out", "hex": "0x02010048", "dec": 33620040 },
+        "UpwardsMove":     { "dir": "out", "hex": "0x02020048", "dec": 33685576 },
+        "TDC":             { "dir": "out", "hex": "0x02030048", "dec": 33751112 },
+        "BDC":             { "dir": "out", "hex": "0x02040048", "dec": 33816648 },
+        "OverrunTDC":      { "dir": "out", "hex": "0x02100048", "dec": 34603080 },
+        "OverrunStop":     { "dir": "out", "hex": "0x02110048", "dec": 34668616 }
+      }
+    },
+    "FBSpeed": {
+      "type": 73, "subtype": "0x49", "subtype_dec": 73,
+      "ports": {
+        "Position": { "dir": "in",  "hex": "0x01100049", "dec": 17825865 },
+        "Error":    { "dir": "out", "hex": "0x02000049", "dec": 33554505 },
+        "Speed":    { "dir": "out", "hex": "0x02100049", "dec": 34603081 }
+      }
+    },
+    "FBLoadSensing": {
+      "type": 74, "subtype": "0x4a", "subtype_dec": 74,
+      "ports": {
+        "Inactive":  { "dir": "in",  "hex": "0x0106004a", "dec": 17170506 },
+        "AnalogInX": { "dir": "in",  "hex": "0x0110004a", "dec": 17825866 },
+        "AnalogInY": { "dir": "in",  "hex": "0x0111004a", "dec": 17891402 },
+        "Valid":     { "dir": "out", "hex": "0x0201004a", "dec": 33620042 },
+        "Warning":   { "dir": "out", "hex": "0x0202004a", "dec": 33685578 }
+      }
+    },
+    "FBViolationCnt": {
+      "type": 75, "subtype": "0x4b", "subtype_dec": 75,
+      "ports": {
+        "Input":          { "dir": "in",  "hex": "0x0100004b", "dec": 16777291 },
+        "Enable":         { "dir": "in",  "hex": "0x0101004b", "dec": 16842827 },
+        "InputOK":        { "dir": "out", "hex": "0x0201004b", "dec": 33620043 },
+        "ActViolationCnt":{ "dir": "out", "hex": "0x0210004b", "dec": 34603083 }
+      }
+    },
+    "FBSLI": {
+      "type": 76, "subtype": "0x4c", "subtype_dec": 76,
+      "ports": {
+        "SLI":         { "dir": "in",  "hex": "0x0100004c", "dec": 16777292 },
+        "Position":    { "dir": "in",  "hex": "0x0110004c", "dec": 17825868 },
+        "Error":       { "dir": "out", "hex": "0x0200004c", "dec": 33554508 },
+        "SLIActive":   { "dir": "out", "hex": "0x0201004c", "dec": 33620044 },
+        "PositionDiff":{ "dir": "out", "hex": "0x0210004c", "dec": 34603084 }
+      }
+    },
+    "FBEnvelope": {
+      "type": 77, "subtype": "0x4d", "subtype_dec": 77,
+      "ports": {
+        "SafeFunction":   { "dir": "in",  "hex": "0x0100004d", "dec": 16777293 },
+        "InValue":        { "dir": "in",  "hex": "0x0110004d", "dec": 17825869 },
+        "Error":          { "dir": "out", "hex": "0x0200004d", "dec": 33554509 },
+        "SafeFunctionOut":{ "dir": "out", "hex": "0x0201004d", "dec": 33620045 }
+      }
+    },
+    "FBSLP": {
+      "type": 78, "subtype": "0x4e", "subtype_dec": 78,
+      "ports": {
+        "SafePosValid":   { "dir": "in",  "hex": "0x0100004e", "dec": 16777294 },
+        "SingleturnPos":  { "dir": "in",  "hex": "0x0101004e", "dec": 16842830 },
+        "MultiturnPos":   { "dir": "in",  "hex": "0x0111004e", "dec": 17891406 },
+        "SingleturnPosLL":{ "dir": "in",  "hex": "0x0112004e", "dec": 17956942 },
+        "MultiturnPosLL": { "dir": "in",  "hex": "0x0113004e", "dec": 18022478 },
+        "SingleturnPosUL":{ "dir": "in",  "hex": "0x0114004e", "dec": 18088014 },
+        "MultiturnPosUL": { "dir": "in",  "hex": "0x0115004e", "dec": 18153550 },
+        "Error":          { "dir": "out", "hex": "0x0200004e", "dec": 33554510 },
+        "PositionInLimit":{ "dir": "out", "hex": "0x0202004e", "dec": 33685582 },
+        "BelowMin":       { "dir": "out", "hex": "0x0203004e", "dec": 33751118 },
+        "AboveMax":       { "dir": "out", "hex": "0x0204004e", "dec": 33816654 }
+      }
+    },
+    "FBSBT": {
+      "type": 79, "subtype": "0x4f", "subtype_dec": 79,
+      "ports": {
+        "SBT":          { "dir": "in",  "hex": "0x0100004f", "dec": 16777295 },
+        "SBTIn":        { "dir": "in",  "hex": "0x0101004f", "dec": 16842831 },
+        "SingleturnPos":{ "dir": "in",  "hex": "0x0110004f", "dec": 17825871 },
+        "ActCurrentIq": { "dir": "in",  "hex": "0x0111004f", "dec": 17891407 },
+        "MinCurrentIq": { "dir": "in",  "hex": "0x0112004f", "dec": 17956943 },
+        "TestError":    { "dir": "out", "hex": "0x0201004f", "dec": 33620047 },
+        "BrakeValid":   { "dir": "out", "hex": "0x0202004f", "dec": 33685583 },
+        "RemainingTime":{ "dir": "out", "hex": "0x0210004f", "dec": 34603087 }
+      }
+    },
+    "FBAdvPosMon": {
+      "type": 80, "subtype": "0x50", "subtype_dec": 80,
+      "ports": {
+        "Restart":  { "dir": "in",  "hex": "0x01000050", "dec": 16777296 },
+        "Enable":   { "dir": "in",  "hex": "0x01010050", "dec": 16842832 },
+        "Error":    { "dir": "out", "hex": "0x02000050", "dec": 33554512 },
+        "Active":   { "dir": "out", "hex": "0x02010050", "dec": 33620048 },
+        "Wait":     { "dir": "out", "hex": "0x02020050", "dec": 33685584 },
+        "OverRange":{ "dir": "out", "hex": "0x02030050", "dec": 33751120 }
+      }
+    },
+    "FBSLI2": {
+      "type": 7602, "subtype": "0x1db2", "subtype_dec": 7602,
+      "ports": {
+        "SLI":         { "dir": "in",  "hex": "0x01001db2", "dec": 16784818 },
+        "Position":    { "dir": "in",  "hex": "0x01101db2", "dec": 17833394 },
+        "Error":       { "dir": "out", "hex": "0x02001db2", "dec": 33563346 },
+        "SLIActive":   { "dir": "out", "hex": "0x02011db2", "dec": 33627570 },
+        "BelowMin":    { "dir": "out", "hex": "0x02021db2", "dec": 33693106 },
+        "AboveMax":    { "dir": "out", "hex": "0x02031db2", "dec": 33758642 },
+        "PositionDiff":{ "dir": "out", "hex": "0x02101db2", "dec": 34610610 }
+      }
+    }
+  }
+}

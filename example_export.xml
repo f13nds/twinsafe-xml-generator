@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TwinCATExport Version="0.32">
+  <GeneralInformation>
+    <ProjectName>TwinSAFE Project</ProjectName>
+    <Author />
+    <InternalProjectName />
+  </GeneralInformation>
+  <TargetSystemConfiguration Id="t1" Type="Hardware" SubType="EL6910" IsExternal="false">
+    <SafeAddress>1</SafeAddress>
+    <VersionNumber>1</VersionNumber>
+    <BackupRestore Activated="false" RestoreUserAdministration="false" NumberOfDevicesWithMatchingCRC="0" />
+    <MapProjectCRC>false</MapProjectCRC>
+    <MapSerialNumber>false</MapSerialNumber>
+    <ConnectionInfoDataConfigOld>false</ConnectionInfoDataConfigOld>
+    <TakeOverSafetyAliasDeviceNamesInProcessImage>false</TakeOverSafetyAliasDeviceNamesInProcessImage>
+    <TakeOverStandardAliasDeviceNamesInProcessImage>false</TakeOverStandardAliasDeviceNamesInProcessImage>
+  </TargetSystemConfiguration>
+  <ApplicationConfiguration>
+    <TwinSAFEGroups>
+      <TwinSAFEGroup Id="g1" OrderId="0">
+        <Name>TwinSafeGroup1</Name>
+        <TwinSAFEGroupOptions>
+          <MapDiag>true</MapDiag>
+          <MapState>true</MapState>
+          <PassificationAllowed>false</PassificationAllowed>
+          <TemporaryDeactivationAllowed>false</TemporaryDeactivationAllowed>
+          <PermanentDeactivationAllowed>false</PermanentDeactivationAllowed>
+          <TimeOutPassificationAllowed>10000</TimeOutPassificationAllowed>
+          <VerifyAnalogFBInputsByStartup>false</VerifyAnalogFBInputsByStartup>
+          <AnalogFBOutputCustomReplacementValues>false</AnalogFBOutputCustomReplacementValues>
+        </TwinSAFEGroupOptions>
+        <GroupInputs>
+          <Element Id="g1_i1">
+            <PortId>16842752</PortId>
+            <Alias>RunStop</Alias>
+            <Active>true</Active>
+          </Element>
+          <Element Id="g1_i2">
+            <PortId>16908288</PortId>
+            <Alias>ErrAck</Alias>
+            <Active>true</Active>
+          </Element>
+          <Element Id="g1_i3">
+            <PortId>16973824</PortId>
+            <Alias>ModuleFault</Alias>
+            <Active>true</Active>
+          </Element>
+        </GroupInputs>
+        <AliasDevices>
+          <StandardAliasDevice Id="g1_a1" OrderId="1">
+            <AliasName>ErrorAcknowledgement</AliasName>
+            <RxPdo BitSize="1">
+              <Element Id="g1_a1_i1">
+                <Name>In</Name>
+                <Type>BIT</Type>
+                <BitOffset>0</BitOffset>
+                <BitSize>1</BitSize>
+                <IsSafeTimer>false</IsSafeTimer>
+              </Element>
+            </RxPdo>
+          </StandardAliasDevice>
+          <StandardAliasDevice Id="g1_a2" OrderId="2">
+            <AliasName>Run</AliasName>
+            <RxPdo BitSize="1">
+              <Element Id="g1_a2_i1">
+                <Name>In</Name>
+                <Type>BIT</Type>
+                <BitOffset>0</BitOffset>
+                <BitSize>1</BitSize>
+                <IsSafeTimer>false</IsSafeTimer>
+              </Element>
+            </RxPdo>
+          </StandardAliasDevice>
+          <SafetyAliasDevice Id="g1_a3" IsExternal="false">
+            <VendorId>2</VendorId>
+            <ProductCode>125710418</ProductCode>
+            <RevisionNo>1114112</RevisionNo>
+            <Type>60</Type>
+            <SubType>190</SubType>
+            <ConnectionType>FSoEMaster</ConnectionType>
+            <LogicType>None</LogicType>
+            <AliasName>EL1904</AliasName>
+            <IoPath />
+            <ConnectionId>1</ConnectionId>
+            <SafeAddress>2</SafeAddress>
+            <DynamicPortionSafeAddress Id="g1_a3_d" />
+            <Watchdog>100</Watchdog>
+            <SafetyParameters>
+              <SafetyParameter OrderId="1" Name="8000:01 FS Operating Mode:Operating Mode">0</SafetyParameter>
+              <SafetyParameter OrderId="2" Name="8001:01 FS Sensor Test:Sensor test Channel 1 active">1</SafetyParameter>
+              <SafetyParameter OrderId="3" Name="8001:02 FS Sensor Test:Sensor test Channel 2 active">1</SafetyParameter>
+              <SafetyParameter OrderId="4" Name="8001:03 FS Sensor Test:Sensor test Channel 3 active">1</SafetyParameter>
+              <SafetyParameter OrderId="5" Name="8001:04 FS Sensor Test:Sensor test Channel 4 active">1</SafetyParameter>
+              <SafetyParameter OrderId="6" Name="8002:01 FS Logic of Input pairs:Logic of Channel 1 and 2">0</SafetyParameter>
+              <SafetyParameter OrderId="7" Name="8002:03 FS Logic of Input pairs:Logic of Channel 3 and 4">0</SafetyParameter>
+              <SafetyParameter OrderId="8" Name="10E0:01 Store Code">0</SafetyParameter>
+              <SafetyParameter OrderId="9" Name="10E0:02 Project CRC">0</SafetyParameter>
+            </SafetyParameters>
+            <RxPdo BitSize="48">
+              <Element Id="g1_a3_i1">
+                <Name>InputChannel1</Name>
+                <Type>BIT</Type>
+                <BitOffset>8</BitOffset>
+                <BitSize>1</BitSize>
+                <IsSafeTimer>false</IsSafeTimer>
+                <Index>24577</Index>
+                <SubIndex>1</SubIndex>
+              </Element>
+              <Element Id="g1_a3_i2">
+                <Name>InputChannel2</Name>
+                <Type>BIT</Type>
+                <BitOffset>9</BitOffset>
+                <BitSize>1</BitSize>
+                <IsSafeTimer>false</IsSafeTimer>
+                <Index>24578</Index>
+                <SubIndex>1</SubIndex>
+              </Element>
+              <Element Id="g1_a3_i3">
+                <Name>InputChannel3</Name>
+                <Type>BIT</Type>
+                <BitOffset>10</BitOffset>
+                <BitSize>1</BitSize>
+                <IsSafeTimer>false</IsSafeTimer>
+                <Index>24579</Index>
+                <SubIndex>1</SubIndex>
+              </Element>
+              <Element Id="g1_a3_i4">
+                <Name>InputChannel4</Name>
+                <Type>BIT</Type>
+                <BitOffset>11</BitOffset>
+                <BitSize>1</BitSize>
+                <IsSafeTimer>false</IsSafeTimer>
+                <Index>24580</Index>
+                <SubIndex>1</SubIndex>
+              </Element>
+            </RxPdo>
+            <ComErrAck Id="g1_a3_c" />
+            <ModuleFaultAsComErr>false</ModuleFaultAsComErr>
+            <MapState>false</MapState>
+            <MapDiag>false</MapDiag>
+            <MapInputs>false</MapInputs>
+            <MapOutputs>false</MapOutputs>
+            <IncrementalDownloadEnabled>false</IncrementalDownloadEnabled>
+          </SafetyAliasDevice>
+          <SafetyAliasDevice Id="g1_a4" IsExternal="false">
+            <VendorId>2</VendorId>
+            <ProductCode>190328914</ProductCode>
+            <RevisionNo>1179648</RevisionNo>
+            <Type>60</Type>
+            <SubType>290</SubType>
+            <ConnectionType>FSoEMaster</ConnectionType>
+            <LogicType>None</LogicType>
+            <AliasName>EL2904</AliasName>
+            <IoPath />
+            <ConnectionId>2</ConnectionId>
+            <SafeAddress>3</SafeAddress>
+            <DynamicPortionSafeAddress Id="g1_a4_d" />
+            <Watchdog>100</Watchdog>
+            <SafetyParameters>
+              <SafetyParameter OrderId="1" Name="8000:01 FSOE Settings:Standard outputs active">0</SafetyParameter>
+              <SafetyParameter OrderId="2" Name="8000:02 FSOE Settings:Current measurement active">1</SafetyParameter>
+              <SafetyParameter OrderId="3" Name="8000:03 FSOE Settings:Testing of outputs active">1</SafetyParameter>
+              <SafetyParameter OrderId="4" Name="8000:04 FSOE Settings:Error acknowledge active">0</SafetyParameter>
+              <SafetyParameter OrderId="5" Name="10E0:01 Store Code">0</SafetyParameter>
+              <SafetyParameter OrderId="6" Name="10E0:02 Project CRC">0</SafetyParameter>
+            </SafetyParameters>
+            <TxPdo BitSize="48">
+              <Element Id="g1_a4_o1">
+                <Name>OutputChannel1</Name>
+                <Type>BIT</Type>
+                <BitOffset>8</BitOffset>
+                <BitSize>1</BitSize>
+                <IsSafeTimer>false</IsSafeTimer>
+                <Index>28673</Index>
+                <SubIndex>1</SubIndex>
+              </Element>
+              <Element Id="g1_a4_o2">
+                <Name>OutputChannel2</Name>
+                <Type>BIT</Type>
+                <BitOffset>9</BitOffset>
+                <BitSize>1</BitSize>
+                <IsSafeTimer>false</IsSafeTimer>
+                <Index>28673</Index>
+                <SubIndex>2</SubIndex>
+              </Element>
+              <Element Id="g1_a4_o3">
+                <Name>OutputChannel3</Name>
+                <Type>BIT</Type>
+                <BitOffset>10</BitOffset>
+                <BitSize>1</BitSize>
+                <IsSafeTimer>false</IsSafeTimer>
+                <Index>28673</Index>
+                <SubIndex>3</SubIndex>
+              </Element>
+              <Element Id="g1_a4_o4">
+                <Name>OutputChannel4</Name>
+                <Type>BIT</Type>
+                <BitOffset>11</BitOffset>
+                <BitSize>1</BitSize>
+                <IsSafeTimer>false</IsSafeTimer>
+                <Index>28673</Index>
+                <SubIndex>4</SubIndex>
+              </Element>
+            </TxPdo>
+            <ComErrAck Id="g1_a4_c" />
+            <ModuleFaultAsComErr>false</ModuleFaultAsComErr>
+            <MapState>false</MapState>
+            <MapDiag>false</MapDiag>
+            <MapInputs>false</MapInputs>
+            <MapOutputs>false</MapOutputs>
+            <IncrementalDownloadEnabled>false</IncrementalDownloadEnabled>
+          </SafetyAliasDevice>
+        </AliasDevices>
+        <Application>
+          <Network Id="g1_n1" OrderId="1">
+            <Name>Network1</Name>
+            <FunctionBlock Id="g1_n1_f1" OrderId="1">
+              <Type>35</Type>
+              <Name>fbOr1</Name>
+              <MapDiag>true</MapDiag>
+              <MapState>true</MapState>
+              <Outports>
+                <Element Id="g1_n1_f1_o1">
+                  <PortId>0x02010023</PortId>
+                  <Alias>OrOut</Alias>
+                  <Negated>false</Negated>
+                  <Active>true</Active>
+                </Element>
+              </Outports>
+              <Inports>
+                <Element Id="g1_n1_f1_i1">
+                  <PortId>0x01080023</PortId>
+                  <Alias>OrIn1</Alias>
+                  <Negated>false</Negated>
+                  <Active>true</Active>
+                </Element>
+                <Element Id="g1_n1_f1_i2">
+                  <PortId>0x01090023</PortId>
+                  <Alias>OrIn2</Alias>
+                  <Negated>false</Negated>
+                  <Active>false</Active>
+                </Element>
+                <Element Id="g1_n1_f1_i3">
+                  <PortId>0x010a0023</PortId>
+                  <Alias>OrIn3</Alias>
+                  <Negated>false</Negated>
+                  <Active>false</Active>
+                </Element>
+                <Element Id="g1_n1_f1_i4">
+                  <PortId>0x010b0023</PortId>
+                  <Alias>OrIn4</Alias>
+                  <Negated>false</Negated>
+                  <Active>false</Active>
+                </Element>
+                <Element Id="g1_n1_f1_i5">
+                  <PortId>0x010c0023</PortId>
+                  <Alias>OrIn5</Alias>
+                  <Negated>false</Negated>
+                  <Active>false</Active>
+                </Element>
+                <Element Id="g1_n1_f1_i6">
+                  <PortId>0x010d0023</PortId>
+                  <Alias>OrIn6</Alias>
+                  <Negated>false</Negated>
+                  <Active>false</Active>
+                </Element>
+                <Element Id="g1_n1_f1_i7">
+                  <PortId>0x010e0023</PortId>
+                  <Alias>OrIn7</Alias>
+                  <Negated>false</Negated>
+                  <Active>false</Active>
+                </Element>
+                <Element Id="g1_n1_f1_i8">
+                  <PortId>0x010f0023</PortId>
+                  <Alias>OrIn8</Alias>
+                  <Negated>false</Negated>
+                  <Active>false</Active>
+                </Element>
+              </Inports>
+            </FunctionBlock>
+          </Network>
+        </Application>
+      </TwinSAFEGroup>
+    </TwinSAFEGroups>
+    <Mappings>
+      <Mapping SourceId="g1_a1_i1" TargetId="g1_i2" LocalVarName="GroupPort_ErrAck" />
+      <Mapping SourceId="g1_a2_i1" TargetId="g1_i1" LocalVarName="GroupPort_RunStop" />
+      <Mapping SourceId="g1_n1_f1_o1" TargetId="g1_a4_o2" LocalVarName="fbOr1_OrOut" />
+      <Mapping SourceId="g1_n1_f1_o1" TargetId="g1_a4_o3" LocalVarName="fbOr1_OrOut" />
+      <Mapping SourceId="g1_a3_i1" TargetId="g1_n1_f1_i1" LocalVarName="fbOr1_OrIn1" />
+    </Mappings>
+  </ApplicationConfiguration>
+</TwinCATExport>

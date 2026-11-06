@@ -1,0 +1,278 @@
+{
+  "Version": "0.31",
+  "GeneralInformation": {
+    "ProjectName": "ExampleTwinSAFEProject",
+    "Author": "Engineer"
+  },
+  "TargetSystemConfiguration": {
+    "Id": "TargetSystem1",
+    "SafeAddress": 1,
+    "Type": "Hardware",
+    "SubType": "EL6900",
+    "VersionNumber": 1,
+    "IoPath": "",
+    "ProductCode": null,
+    "RevisionNo": null,
+    "MapProjectCRC": false,
+    "TakeOverStandardAliasDeviceNamesInProcessImage": false,
+    "TakeOverSafetyAliasDeviceNamesInProcessImage": false,
+    "MapSerialNumber": false
+  },
+  "ApplicationConfiguration": {
+    "TwinSAFEGroups": [
+      {
+        "Id": "G1",
+        "OrderId": 1,
+        "Name": "EStopGroup",
+        "MapDiag": false,
+        "MapState": false,
+        "PassificationAllowed": false,
+        "TemporaryDeactivationAllowed": false,
+        "PermanentDeactivationAllowed": false,
+        "TimeOutPassificationAllowed": null,
+        "VerifyAnalogFBInputsByStartup": false,
+        "AnalogFBOutputCustomReplacementValues": false,
+        "AliasDevices": [
+          {
+            "Id": "AD1",
+            "AliasName": "EL1904_Input",
+            "VendorId": 2,
+            "Type": 1,
+            "SubType": 1,
+            "ConnectionId": 1,
+            "SafeAddress": 11,
+            "Watchdog": 100,
+            "ConnectionType": null,
+            "ProductCode": null,
+            "RevisionNo": null,
+            "IoPath": "",
+            "MapState": false,
+            "MapDiag": false,
+            "MapInputs": false,
+            "MapOutputs": false,
+            "IsExternal": false,
+            "RxPdo": {
+              "BitSize": 8,
+              "Elements": [
+                {
+                  "Id": "AD1_Rx1",
+                  "Name": "SafeInput1",
+                  "Alias": "EStop1",
+                  "Type": "BIT",
+                  "BitOffset": 0,
+                  "BitSize": 1,
+                  "SubIndex": null,
+                  "Index": null,
+                  "IsSafeTimer": null
+                },
+                {
+                  "Id": "AD1_Rx2",
+                  "Name": "SafeInput2",
+                  "Alias": "EStop2",
+                  "Type": "BIT",
+                  "BitOffset": 1,
+                  "BitSize": 1,
+                  "SubIndex": null,
+                  "Index": null,
+                  "IsSafeTimer": null
+                }
+              ]
+            },
+            "TxPdo": {
+              "BitSize": 8,
+              "Elements": [
+                {
+                  "Id": "AD1_Tx1",
+                  "Name": "SafeOutput1",
+                  "Alias": "Valve1",
+                  "Type": "BIT",
+                  "BitOffset": 0,
+                  "BitSize": 1,
+                  "SubIndex": null,
+                  "Index": null,
+                  "IsSafeTimer": null
+                }
+              ]
+            },
+            "SafetyParameters": [],
+            "Comment": ""
+          },
+          {
+            "Id": "AD2",
+            "AliasName": "EL1904_Output",
+            "VendorId": 2,
+            "Type": 1,
+            "SubType": 1,
+            "ConnectionId": 2,
+            "SafeAddress": 12,
+            "Watchdog": 100,
+            "ConnectionType": null,
+            "ProductCode": null,
+            "RevisionNo": null,
+            "IoPath": "",
+            "MapState": false,
+            "MapDiag": false,
+            "MapInputs": false,
+            "MapOutputs": false,
+            "IsExternal": false,
+            "RxPdo": {
+              "BitSize": 8,
+              "Elements": [
+                {
+                  "Id": "AD2_Rx1",
+                  "Name": "SafeInput3",
+                  "Alias": "Door1",
+                  "Type": "BIT",
+                  "BitOffset": 0,
+                  "BitSize": 1,
+                  "SubIndex": null,
+                  "Index": null,
+                  "IsSafeTimer": null
+                }
+              ]
+            },
+            "TxPdo": {
+              "BitSize": 8,
+              "Elements": [
+                {
+                  "Id": "AD2_Tx1",
+                  "Name": "SafeOutput2",
+                  "Alias": "Valve2",
+                  "Type": "BIT",
+                  "BitOffset": 0,
+                  "BitSize": 1,
+                  "SubIndex": null,
+                  "Index": null,
+                  "IsSafeTimer": null
+                },
+                {
+                  "Id": "AD2_Tx2",
+                  "Name": "SafeOutput3",
+                  "Alias": "Valve3",
+                  "Type": "BIT",
+                  "BitOffset": 1,
+                  "BitSize": 1,
+                  "SubIndex": null,
+                  "Index": null,
+                  "IsSafeTimer": null
+                }
+              ]
+            },
+            "SafetyParameters": [],
+            "Comment": ""
+          }
+        ],
+        "FunctionBlocks": [
+          {
+            "Id": "G1_FB1",
+            "OrderId": 1,
+            "Name": "EStopMain",
+            "Type": 32,
+            "MapState": false,
+            "MapDiag": false,
+            "Comment": "",
+            "settings": {},
+            "Inports": [
+              {
+                "Id": "G1_FB1_Restart",
+                "PortId": "0x01000020",
+                "Alias": "Restart",
+                "Active": true,
+                "PortName": "",
+                "Negated": false,
+                "SubstituteValue": null,
+                "Type": null,
+                "Comment": ""
+              },
+              {
+                "Id": "G1_FB1_EStopIn1",
+                "PortId": "0x01080020",
+                "Alias": "EStopIn1",
+                "Active": true,
+                "PortName": "",
+                "Negated": false,
+                "SubstituteValue": null,
+                "Type": null,
+                "Comment": ""
+              },
+              {
+                "Id": "G1_FB1_EStopIn2",
+                "PortId": "0x01090020",
+                "Alias": "EStopIn2",
+                "Active": true,
+                "PortName": "",
+                "Negated": false,
+                "SubstituteValue": null,
+                "Type": null,
+                "Comment": ""
+              }
+            ],
+            "Outports": [
+              {
+                "Id": "G1_FB1_EStopOut",
+                "PortId": "0x02010020",
+                "Alias": "EStopOut",
+                "Active": true,
+                "PortName": "",
+                "Negated": false,
+                "SubstituteValue": null,
+                "Type": null,
+                "Comment": ""
+              },
+              {
+                "Id": "G1_FB1_Error",
+                "PortId": "0x02000020",
+                "Alias": "Error",
+                "Active": true,
+                "PortName": "",
+                "Negated": false,
+                "SubstituteValue": null,
+                "Type": null,
+                "Comment": ""
+              }
+            ]
+          },
+          {
+            "Id": "G1_FB2",
+            "OrderId": 2,
+            "Name": "And1",
+            "Type": 34,
+            "MapState": false,
+            "MapDiag": false,
+            "Comment": "",
+            "settings": {},
+            "Inports": [
+              {
+                "Id": "G1_FB2_AndIn1",
+                "PortId": "0x01080022",
+                "Alias": "EStopOk",
+                "Active": true,
+                "PortName": "",
+                "Negated": false,
+                "SubstituteValue": null,
+                "Type": null,
+                "Comment": ""
+              }
+            ],
+            "Outports": [
+              {
+                "Id": "G1_FB2_AndOut",
+                "PortId": "0x02010022",
+                "Alias": "SafeOut",
+                "Active": true,
+                "PortName": "",
+                "Negated": false,
+                "SubstituteValue": null,
+                "Type": null,
+                "Comment": ""
+              }
+            ]
+          }
+        ],
+        "GroupOutputs": [],
+        "GroupInputs": [],
+        "Comment": ""
+      }
+    ]
+  }
+}

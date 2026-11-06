@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.eggs/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# 临时/测试文件
+fix_var_order.py
+verify.py
+test_simple.py
+test_simple.xml
+generate_xml.py
+
+# pip 缓存
+pip-build-tracker-*/
+pip-ephem-wheel-cache-*/
+pip-install-*/
+pip-target-*/
+pip-unpack-*/
