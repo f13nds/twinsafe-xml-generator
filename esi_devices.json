@@ -1,0 +1,492 @@
+[
+  {
+    "name": "InoSV680S-FSoE-SRA",
+    "base_name": "InoSV680S",
+    "module_type": "FSoE-SRA",
+    "description": "SV680S1Axis_02003",
+    "product_code_hex": "#x000C0119",
+    "revision_no_hex": "#x00010000",
+    "ProductCode": 786713,
+    "RevisionNo": 65536,
+    "VendorId": 1048576,
+    "SubType": 4097,
+    "ModuleIdent": "#x00001001",
+    "slots": [
+      "FSoE-Slot"
+    ],
+    "HasFSLOGIC": false,
+    "HasFSoE": true,
+    "rx_elements": [
+      {
+        "Name": "FSoE Slave Command",
+        "Index": "#xE600",
+        "SubIndex": "1",
+        "BitLen": "8",
+        "DataType": "USINT"
+      },
+      {
+        "Name": "STO Active",
+        "Index": "#x6640",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SSM status",
+        "Index": "#x66E0",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SOS active",
+        "Index": "#x6668",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SDIp active",
+        "Index": "#x66D0",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SDIn active",
+        "Index": "#x66D1",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "Error",
+        "Index": "#x6632",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "Restart",
+        "Index": "#x6630",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SBC active",
+        "Index": "#x6660",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command1 active",
+        "Index": "#x6690",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command2 active",
+        "Index": "#x6690",
+        "SubIndex": "2",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command3 active",
+        "Index": "#x6690",
+        "SubIndex": "3",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command4 active",
+        "Index": "#x6690",
+        "SubIndex": "4",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "FSoE Slave CRC_0",
+        "Index": "#xE600",
+        "SubIndex": "3",
+        "BitLen": "16",
+        "DataType": "UINT"
+      },
+      {
+        "Name": "FSoE Slave Connection ID",
+        "Index": "#xE600",
+        "SubIndex": "2",
+        "BitLen": "16",
+        "DataType": "UINT"
+      }
+    ],
+    "tx_elements": [
+      {
+        "Name": "FSoE Master Command",
+        "Index": "#xE700",
+        "SubIndex": "1",
+        "BitLen": "8",
+        "DataType": "USINT"
+      },
+      {
+        "Name": "STO command",
+        "Index": "#x6640",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SS1 command",
+        "Index": "#x6650",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SS2 command",
+        "Index": "#x6670",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SOS command",
+        "Index": "#x6668",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SDIp command",
+        "Index": "#x66D0",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SDIn command",
+        "Index": "#x66D1",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "Error Ack",
+        "Index": "#x6632",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "Restart Ack",
+        "Index": "#x6630",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SBC command",
+        "Index": "#x6660",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command1",
+        "Index": "#x6690",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command2",
+        "Index": "#x6690",
+        "SubIndex": "2",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command3",
+        "Index": "#x6690",
+        "SubIndex": "3",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command4",
+        "Index": "#x6690",
+        "SubIndex": "4",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "FSoE Master CRC_0",
+        "Index": "#xE700",
+        "SubIndex": "3",
+        "BitLen": "16",
+        "DataType": "UINT"
+      },
+      {
+        "Name": "FSoE Master ConnectionID",
+        "Index": "#xE700",
+        "SubIndex": "2",
+        "BitLen": "16",
+        "DataType": "UINT"
+      }
+    ],
+    "rx_count": 15,
+    "tx_count": 16,
+    "category": "安全别名设备",
+    "IsSafetyPLC": false,
+    "IsAliasDevice": true,
+    "source_file": "INOVANCE_SV680N-S3_1Axis_V0.03.xml"
+  },
+  {
+    "name": "InoSV680S-FSoE-noSRA",
+    "base_name": "InoSV680S",
+    "module_type": "FSoE-noSRA",
+    "description": "SV680S1Axis_02003",
+    "product_code_hex": "#x000C0119",
+    "revision_no_hex": "#x00010000",
+    "ProductCode": 786713,
+    "RevisionNo": 65536,
+    "VendorId": 1048576,
+    "SubType": 8193,
+    "ModuleIdent": "#x00002001",
+    "slots": [
+      "FSoE-Slot"
+    ],
+    "HasFSLOGIC": false,
+    "HasFSoE": true,
+    "rx_elements": [
+      {
+        "Name": "FSoE Slave Command",
+        "Index": "#xE600",
+        "SubIndex": "1",
+        "BitLen": "8",
+        "DataType": "USINT"
+      },
+      {
+        "Name": "STO Active",
+        "Index": "#x6640",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SSM status",
+        "Index": "#x66E0",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SOS active",
+        "Index": "#x6668",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SDIp active",
+        "Index": "#x66D0",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SDIn active",
+        "Index": "#x66D1",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "Error",
+        "Index": "#x6632",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "Restart",
+        "Index": "#x6630",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SBC active",
+        "Index": "#x6660",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command1 active",
+        "Index": "#x6690",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command2 active",
+        "Index": "#x6690",
+        "SubIndex": "2",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command3 active",
+        "Index": "#x6690",
+        "SubIndex": "3",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command4 active",
+        "Index": "#x6690",
+        "SubIndex": "4",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "FSoE Slave CRC_0",
+        "Index": "#xE600",
+        "SubIndex": "3",
+        "BitLen": "16",
+        "DataType": "UINT"
+      },
+      {
+        "Name": "FSoE Slave Connection ID",
+        "Index": "#xE600",
+        "SubIndex": "2",
+        "BitLen": "16",
+        "DataType": "UINT"
+      }
+    ],
+    "tx_elements": [
+      {
+        "Name": "FSoE Master Command",
+        "Index": "#xE700",
+        "SubIndex": "1",
+        "BitLen": "8",
+        "DataType": "USINT"
+      },
+      {
+        "Name": "STO command",
+        "Index": "#x6640",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SS1 command",
+        "Index": "#x6650",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SS2 command",
+        "Index": "#x6670",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SOS command",
+        "Index": "#x6668",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SDIp command",
+        "Index": "#x66D0",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SDIn command",
+        "Index": "#x66D1",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "Error Ack",
+        "Index": "#x6632",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "Restart Ack",
+        "Index": "#x6630",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SBC command",
+        "Index": "#x6660",
+        "SubIndex": "0",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command1",
+        "Index": "#x6690",
+        "SubIndex": "1",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command2",
+        "Index": "#x6690",
+        "SubIndex": "2",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command3",
+        "Index": "#x6690",
+        "SubIndex": "3",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "SLS command4",
+        "Index": "#x6690",
+        "SubIndex": "4",
+        "BitLen": "1",
+        "DataType": "BOOL"
+      },
+      {
+        "Name": "FSoE Master CRC_0",
+        "Index": "#xE700",
+        "SubIndex": "3",
+        "BitLen": "16",
+        "DataType": "UINT"
+      },
+      {
+        "Name": "FSoE Master ConnectionID",
+        "Index": "#xE700",
+        "SubIndex": "2",
+        "BitLen": "16",
+        "DataType": "UINT"
+      }
+    ],
+    "rx_count": 15,
+    "tx_count": 16,
+    "category": "安全别名设备",
+    "IsSafetyPLC": false,
+    "IsAliasDevice": true,
+    "source_file": "INOVANCE_SV680N-S3_1Axis_V0.03.xml"
+  }
+]

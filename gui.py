@@ -18,8 +18,131 @@ from beckhoff_io_library import (
     get_device_display_list, parse_device_key,
     create_alias_device_from_library, get_device_info
 )
+from esi_parser import parse_esi_file, parse_esi_directory, get_alias_devices, get_safety_plc_devices
+
+
+def load_imported_devices():
+    """启动时从 esi_devices.json 加载导入的设备到设备库"""
+    import json
+    import os
+    from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+    
+    # 查找 esi_devices.json 文件
+    json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "esi_devices.json")
+    if not os.path.exists(json_path):
+        return 0
+    
+    try:
+        with open(json_path, "r", encoding="utf-8") as f:
+            devices = json.load(f)
+    except:
+        return 0
+    
+    loaded_count = 0
+    for d in devices:
+        name = d.get("name", "")
+        rev = d.get("revision_no_hex", "")
+        
+        if not name:
+            continue
+        
+        # 生成唯一 Key（使用 name 作为主键，避免重复）
+        variant_key = name
+        
+        # 转换 PDO 格式
+        rx_elements = d.get("rx_elements", [])
+        tx_elements = d.get("tx_elements", [])
+        
+        rx_pdo = None
+        if rx_elements:
+            rx_pdo = {
+                "BitSize": sum(int(e.get("BitLen", 1) or 1) for e in rx_elements) + 8,
+                "Elements": []
+            }
+            bit_offset = 8
+            for i, e in enumerate(rx_elements):
+                bit_len = int(e.get("BitLen", 1) or 1)
+                rx_pdo["Elements"].append({
+                    "Name": e.get("Name", f"Input{i+1}"),
+                    "Type": "BIT" if bit_len == 1 else "UINT" if bit_len == 16 else "USINT",
+                    "BitOffset": bit_offset,
+                    "BitSize": bit_len,
+                    "IsSafeTimer": False,
+                    "Index": e.get("Index", ""),
+                    "SubIndex": e.get("SubIndex", ""),
+                })
+                bit_offset += bit_len
+        
+        tx_pdo = None
+        if tx_elements:
+            tx_pdo = {
+                "BitSize": sum(int(e.get("BitLen", 1) or 1) for e in tx_elements) + 8,
+                "Elements": []
+            }
+            bit_offset = 8
+            for i, e in enumerate(tx_elements):
+                bit_len = int(e.get("BitLen", 1) or 1)
+                tx_pdo["Elements"].append({
+                    "Name": e.get("Name", f"Output{i+1}"),
+                    "Type": "BIT" if bit_len == 1 else "UINT" if bit_len == 16 else "USINT",
+                    "BitOffset": bit_offset,
+                    "BitSize": bit_len,
+                    "IsSafeTimer": False,
+                    "Index": e.get("Index", ""),
+                    "SubIndex": e.get("SubIndex", ""),
+                })
+                bit_offset += bit_len
+        
+        BECKHOFF_SAFETY_DEVICES[variant_key] = {
+            "name": name,
+            "description": d.get("description", ""),
+            "HasFSLOGIC": d.get("HasFSLOGIC", False),
+            "HasFSoE": d.get("HasFSoE", False),
+            "IsSafetyPLC": d.get("IsSafetyPLC", False),
+            "IsAliasDevice": d.get("IsAliasDevice", False),
+            "VendorId": d.get("VendorId", 2),
+            "ProductCode": d.get("ProductCode", 0),
+            "RevisionNo": d.get("RevisionNo", 0),
+            "Type": 60,
+            "SubType": d.get("SubType", 0),
+            "ConnectionType": "FSoEMaster",
+            "LogicType": "None",
+            "Watchdog": 100,
+            "SafetyParameters": [],
+            "RxPdo": rx_pdo,
+            "TxPdo": tx_pdo,
+            "source_file": d.get("source_file", ""),
+        }
+        loaded_count += 1
+    
+    return loaded_count
 from xml_generator import TwinSAFEXmlGenerator
 from xsd_validator import validate_with_xsd
+
+
+def sanitize_c_identifier(name: str) -> str:
+    """清理字符串使其符合 C 命名规则（将不允许的字符替换为下划线）
+    
+    C 命名规则：只能包含字母、数字、下划线，且不能以数字开头
+    """
+    if not name:
+        return name
+    
+    import re
+    # 将不允许的字符（包括中文）替换为下划线
+    sanitized = re.sub(r'[^a-zA-Z0-9_]', '_', name)
+    
+    # 将连续的下划线合并为一个
+    sanitized = re.sub(r'_+', '_', sanitized)
+    
+    # 去除首尾下划线
+    sanitized = sanitized.strip('_')
+    
+    # 如果以数字开头，添加下划线前缀
+    if sanitized and sanitized[0].isdigit():
+        sanitized = '_' + sanitized
+    
+    return sanitized
 
 
 def validate_c_identifier(name: str) -> tuple:
@@ -257,11 +380,30 @@ class AliasDeviceDialog(tk.Toplevel):
         ttk.Button(btn_frame, text="取消", command=self._cancel).pack(side=tk.RIGHT)
 
     def _get_device_model_name(self):
-        """获取当前设备型号缩写"""
-        subtype_map = {190: "EL1904", 290: "EL2904", 17827710: "EL1918",
-                       526206: "EP1918", 526245: "EP1957", 527206: "EP2918"}
+        """获取当前设备型号缩写（从设备库）"""
         if self.device and hasattr(self.device, 'SubType'):
-            return subtype_map.get(self.device.SubType, f"SubType={self.device.SubType}")
+            subtype = self.device.SubType
+            # 先从静态映射查找
+            subtype_map = {190: "EL1904", 290: "EL2904", 17827710: "EL1918",
+                          526206: "EP1918", 526245: "EP1957", 527206: "EP2918"}
+            model = subtype_map.get(subtype, None)
+            if model:
+                return model
+            
+            # 从设备库查找（支持导入的设备）
+            from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+            for key, info in BECKHOFF_SAFETY_DEVICES.items():
+                if info.get("SubType") == subtype:
+                    name = info.get("name", "")
+                    model = name.split(",")[0].split(" - ")[0].strip()
+                    return model
+                # 也按 ProductCode 匹配
+                if info.get("ProductCode") and info.get("ProductCode") == getattr(self.device, 'ProductCode', 0):
+                    name = info.get("name", "")
+                    model = name.split(",")[0].split(" - ")[0].strip()
+                    return model
+            
+            return f"SubType={subtype}"
         return "未知"
 
     # =============================================================
@@ -279,7 +421,9 @@ class AliasDeviceDialog(tk.Toplevel):
             # 如果别名为空或等于上一次自动填入的型号，更新为新设备型号
             if not current_alias or current_alias == self._last_device_key:
                 self.entries["AliasName"].delete(0, tk.END)
-                self.entries["AliasName"].insert(0, device_key)
+                # 清理名称以符合 C 命名规则
+                safe_name = sanitize_c_identifier(device_key)
+                self.entries["AliasName"].insert(0, safe_name)
             self._last_device_key = device_key
             
             # 自动创建设备配置（无需按钮）
@@ -457,7 +601,7 @@ class AliasDeviceDialog(tk.Toplevel):
             devices = []
             from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
             dev_info = BECKHOFF_SAFETY_DEVICES.get(device_key, {})
-            default_name = dev_info.get("name", device_key)
+            default_name = sanitize_c_identifier(dev_info.get("name", device_key))
             
             # 解析基础ID号
             base_id = self.next_device_id
@@ -518,6 +662,11 @@ class TwinSAFEConfiguratorApp:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("TwinSAFE XML 配置生成器")
+        
+        # 启动时加载导入的设备
+        loaded = load_imported_devices()
+        if loaded > 0:
+            print(f"已加载 {loaded} 个导入的设备")
         self.root.geometry("1200x800")
 
         self.project = TwinSAFEProject()
@@ -681,7 +830,11 @@ class TwinSAFEConfiguratorApp:
         for row, (label, key) in enumerate(target_fields):
             ttk.Label(frame2, text=label).grid(row=row, column=0, sticky=tk.W, pady=3)
             if key == "SubType":
-                values = ["EL6900", "EL6910", "EL1918", "EP1918", "EP1957", "EP2918"]
+                # 动态生成安全PLC下拉列表（含变体）
+                values = self._get_safety_plc_display_list()
+                if not values:
+                    # 回退到默认列表
+                    values = ["EL6900", "EL6910", "EL1918", "EP1918", "EP1957", "EP2918"]
                 cb = ttk.Combobox(frame2, values=values, state="readonly", width=48)
                 cb.grid(row=row, column=1, sticky=tk.EW, pady=3)
                 cb.bind("<<ComboboxSelected>>", lambda e, k=key: self._update_target_from_entries(k))
@@ -904,11 +1057,24 @@ class TwinSAFEConfiguratorApp:
         if fb is None:
             g = self._current_group()
             if not g:
+                # 尝试查找包含安全PLC设备的组
+                for group in self.project.ApplicationConfiguration.TwinSAFEGroups:
+                    for dev in group.AliasDevices:
+                        if hasattr(dev, 'ConnectionType') and dev.ConnectionType == "Local":
+                            g = group
+                            self.current_group = g
+                            break
+                    if g:
+                        break
+            if not g:
                 return
             sel = self.fb_listbox.curselection()
             if not sel:
                 return
-            fb = g.FunctionBlocks[sel[0]]
+            if sel[0] < len(g.FunctionBlocks):
+                fb = g.FunctionBlocks[sel[0]]
+            else:
+                return
         
         # 从项目数据重建引脚状态（JSON 导入后恢复启用状态、变量名、通道关联）
         self._rebuild_pin_state_from_fb(fb)
@@ -925,6 +1091,72 @@ class TwinSAFEConfiguratorApp:
         for port in fb.Inports:
             self._create_pin_row(port, "输入", input_channels)
 
+    # FSoE 协议字段（不需要在通道下拉中显示）
+    # 注意：不包括 Error Ack、Restart Ack、STO command 等安全功能字段
+    _FSOE_PROTOCOL_FIELDS = {
+        "fsoe master command", "fsoe slave command",
+        "fsoe master crc_0", "fsoe slave crc_0",
+        "fsoe master connectionid", "fsoe slave connection id",
+        "fsoe master connection id",
+    }
+    
+    @staticmethod
+    def _extract_model_name(display_name: str) -> str:
+        """从显示名提取型号名（如 "EL1918, 8 digital inputs (FW 2)" -> "EL1918"）"""
+        if not display_name:
+            return display_name
+        # 提取型号：按逗号、空格、连字符分割，取第一部分
+        model = display_name.split(",")[0].split(" - ")[0].strip()
+        return model
+    
+    @staticmethod
+    def _is_safety_drive_device(dev) -> bool:
+        """判断是否是安全驱动设备（RxPdo=命令, TxPdo=状态）
+        
+        安全驱动设备特征：
+        - SubType 在安全驱动范围内（INOVANCE 等）
+        - 或 RxPdo/TxPdo 包含 STO/SS1/SS2/SOS/SLS 等安全功能关键字
+        """
+        # 检查 SubType（INOVANCE 安全驱动）
+        subtype = getattr(dev, 'SubType', 0)
+        # INOVANCE 安全驱动的 SubType 范围
+        if subtype in (4097, 4098, 8193, 8194):  # FSoE-SRA, FSoE-noSRA 等
+            return True
+        
+        # 检查 PDO 内容是否包含安全驱动关键字
+        safety_drive_keywords = {
+            "sto command", "ss1 command", "ss2 command", "sos command",
+            "sbc command", "sls command", "sdip command", "sdin command",
+            "sto active", "ssm status", "sos active", "sbc active",
+            "sls command1 active", "sls command2 active",
+            "error ack", "restart ack",
+        }
+        
+        # 检查 RxPdo（命令方向）
+        if hasattr(dev, 'RxPdo') and dev.RxPdo:
+            for elem in dev.RxPdo.Elements:
+                name_lower = elem.Name.lower().strip()
+                if any(kw in name_lower for kw in safety_drive_keywords):
+                    return True
+        
+        return False
+    
+    @classmethod
+    def _is_fsoe_protocol_field(cls, name: str) -> bool:
+        """判断是否是 FSoE 协议字段（FSoE Master/Slave Command/ConnectionID/CRC 等）
+        注意：不包括 Error Ack、Restart Ack、STO command 等安全功能字段"""
+        name_lower = name.lower().strip()
+        # 精确匹配
+        if name_lower in cls._FSOE_PROTOCOL_FIELDS:
+            return True
+        # 只过滤 FSoE Master/Slave 的协议字段
+        for keyword in ["fsoe master command", "fsoe slave command",
+                       "fsoe master crc", "fsoe slave crc",
+                       "fsoe master connection", "fsoe slave connection"]:
+            if keyword in name_lower:
+                return True
+        return False
+    
     def _get_alias_channels(self, pin_type=None):
         """获取当前组别名设备的通道列表，返回 [(显示名, target_id), ...]
         
@@ -934,20 +1166,39 @@ class TwinSAFEConfiguratorApp:
         channels = []
         g = self._current_group()  # 只获取当前组的设备
         if not g:
+            # 如果没有选中组，尝试查找包含安全PLC设备的组
+            for group in self.project.ApplicationConfiguration.TwinSAFEGroups:
+                for dev in group.AliasDevices:
+                    if hasattr(dev, 'ConnectionType') and dev.ConnectionType == "Local":
+                        g = group
+                        break
+                if g:
+                    break
+        if not g:
             return channels
         for dev in g.AliasDevices:
             dev_name = dev.AliasName or dev.Id
             # 跳过 ErrorAcknowledgement 和 Run 设备
             if dev_name in ("ErrorAcknowledgement", "Run"):
                 continue
-            # RxPdo 通道（输入）
+            
+            # SM 属性解析后的统一方向映射：
+            # RxPdo (SM=3) = 输入通道 → FB 输入（设备状态）
+            # TxPdo (SM=2) = 输出通道 → FB 输出（设备命令）
+            
+            # RxPdo → FB 输入通道
             if pin_type != "输出" and hasattr(dev, 'RxPdo') and dev.RxPdo:
                 for elem in dev.RxPdo.Elements:
+                    if self._is_fsoe_protocol_field(elem.Name):
+                        continue
                     display = f"{dev_name}.{elem.Name}"
                     channels.append((display, elem.Id))
-            # TxPdo 通道（输出）
+            
+            # TxPdo → FB 输出通道
             if pin_type != "输入" and hasattr(dev, 'TxPdo') and dev.TxPdo:
                 for elem in dev.TxPdo.Elements:
+                    if self._is_fsoe_protocol_field(elem.Name):
+                        continue
                     display = f"{dev_name}.{elem.Name}"
                     channels.append((display, elem.Id))
         return channels
@@ -1212,6 +1463,8 @@ class TwinSAFEConfiguratorApp:
                         fb_name = self.current_fb.Name
                     # 自动生成变量名: FBName_PinName
                     auto_var_name = f"{fb_name}_{pin_name}" if fb_name and pin_name else pin_name
+                    # 清理变量名以符合 C 命名规则
+                    auto_var_name = sanitize_c_identifier(auto_var_name)
                     entry.insert(0, auto_var_name)
                     self.pin_var_names[source_id] = auto_var_name
                 
@@ -1287,6 +1540,10 @@ class TwinSAFEConfiguratorApp:
             if not ok:
                 messagebox.showwarning("校验失败", f"变量名{msg}")
                 return
+            # 清理变量名以符合 C 命名规则
+            var_name = sanitize_c_identifier(var_name)
+            entry.delete(0, tk.END)
+            entry.insert(0, var_name)
         self.pin_var_names[source_id] = var_name
 
         # 同步到 Mapping
@@ -1371,6 +1628,8 @@ class TwinSAFEConfiguratorApp:
         top = ttk.Frame(tab)
         top.pack(fill=tk.X, padx=5, pady=5)
         ttk.Button(top, text="添加安全别名设备", command=self._add_safety_alias).pack(side=tk.LEFT, padx=3)
+        ttk.Button(top, text="解析 ESI 文件", command=self._parse_esi_files).pack(side=tk.LEFT, padx=3)
+        ttk.Button(top, text="管理导入设备", command=self._manage_imported_devices).pack(side=tk.LEFT, padx=3)
         ttk.Button(top, text="编辑选中设备", command=self._edit_alias).pack(side=tk.LEFT, padx=3)
         ttk.Button(top, text="删除选中设备", command=self._delete_alias).pack(side=tk.LEFT, padx=3)
 
@@ -1497,10 +1756,11 @@ class TwinSAFEConfiguratorApp:
     # UI 同步
     # ------------------------------------------------------------------
     def _sync_from_ui(self):
+        """同步 UI 到数据模型（轻量级，无弹窗校验）"""
         self._update_project_from_entries(None)
         self._update_target_from_entries(None)
-        self._update_group()
-        self._update_fb()
+        self._sync_group_from_entries()
+        self._sync_fb_from_entries()
 
     def _refresh_ui(self):
         self._refresh_project_entries()
@@ -1543,13 +1803,120 @@ class TwinSAFEConfiguratorApp:
         except ValueError:
             pass
         old_subtype = t.SubType
-        t.SubType = self.entries_target["SubType"].get() or t.SubType
+        # 提取型号名（如 "EL1918, 8 digital inputs (FW 2)" -> "EL1918"）
+        subtype_display = self.entries_target["SubType"].get() or t.SubType
+        t.SubType = self._extract_model_name(subtype_display)
         
         # 如果安全PLC类型变更，自动删除旧的安全PLC别名设备，添加新的
         if key == "SubType" and old_subtype != t.SubType:
             self._remove_safety_plc_device()
-            if t.SubType in ("EL1918", "EP1918", "EP1957", "EP2918"):
-                self._add_el1918_as_plc_device()
+            # 规则2: 设备 Slots 中同时包含 FSLOGIC 和 FSoE → 自动生成安全别名设备
+            if self._device_has_fslogic_and_fsoe(t.SubType):
+                self._add_safety_plc_as_alias_device()
+
+    def _add_el1918_as_plc_device(self):
+        """兼容性: 转发到新函数"""
+        self._add_safety_plc_as_alias_device()
+
+    # ============================================================
+    # 基于 Slot 的设备分类规则
+    # ============================================================
+    # 规则1: Slots 含 FSLOGIC → 可作为安全PLC
+    # 规则2: Slots 含 FSLOGIC + FSoE → 双模式（安全PLC + 安全别名设备）
+    # 规则3: EL6900/EL6910/EL6930/EJ6910 → 仅安全PLC
+    # 规则4: 有 RxPdo/TxPdo 但无 FSLOGIC → 仅安全别名设备
+
+    @staticmethod
+    def _find_device_key_by_name(display_name: str) -> str:
+        """根据显示名称查找设备Key"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+        # 精确匹配 name
+        for k, v in BECKHOFF_SAFETY_DEVICES.items():
+            if v.get("name", "") == display_name:
+                return k
+        # 模糊匹配
+        for k, v in BECKHOFF_SAFETY_DEVICES.items():
+            if display_name in v.get("name", "") or display_name in k:
+                return k
+        return display_name  # 返回原值作为回退
+
+    # 规则3: 纯安全PLC设备（无 FSoE，不能作为别名设备）
+    _PLC_ONLY_DEVICES = {"EL6900", "EL6910", "EL6930", "EJ6910"}
+
+    @staticmethod
+    def _device_has_fslogic(device_key: str) -> bool:
+        """规则1: 设备 Slots 中包含 FSLOGIC → 可作为安全PLC下拉选择"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+        info = BECKHOFF_SAFETY_DEVICES.get(device_key, {})
+        return info.get("HasFSLOGIC", False)
+
+    @staticmethod
+    def _device_has_fslogic_and_fsoe(device_key: str) -> bool:
+        """规则2: 设备 Slots 中同时包含 FSLOGIC 和 FSoE → 双模式设备
+        支持设备Key或显示名称"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+        # 先尝试直接匹配Key
+        info = BECKHOFF_SAFETY_DEVICES.get(device_key, {})
+        if info:
+            return info.get("HasFSLOGIC", False) and info.get("HasFSoE", False)
+        # 尝试按名称匹配
+        for k, v in BECKHOFF_SAFETY_DEVICES.items():
+            if v.get("name", "") == device_key:
+                return v.get("HasFSLOGIC", False) and v.get("HasFSoE", False)
+        return False
+
+    @classmethod
+    def _is_plc_only_device(cls, device_key: str) -> bool:
+        """规则3: EL6900/EL6910/EL6930/EJ6910 → 仅安全PLC"""
+        return device_key in cls._PLC_ONLY_DEVICES
+
+    @staticmethod
+    def _is_alias_only_device(device_key: str) -> bool:
+        """规则4: 有 RxPdo/TxPdo 但无 FSLOGIC → 仅安全别名设备"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+        info = BECKHOFF_SAFETY_DEVICES.get(device_key, {})
+        has_pdo = bool(info.get("RxPdo")) or bool(info.get("TxPdo"))
+        return has_pdo and not info.get("HasFSLOGIC", False)
+
+    @staticmethod
+    def _get_safety_plc_device_keys() -> list:
+        """获取所有可作为安全PLC的设备Key（含FSLOGIC的设备 + 纯PLC设备）"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+        result = []
+        for k, v in BECKHOFF_SAFETY_DEVICES.items():
+            if v.get("IsSafetyPLC", False):
+                result.append(k)
+        return result
+
+    @staticmethod
+    def _get_safety_plc_display_list() -> list:
+        """获取安全PLC下拉显示列表（含变体标注）"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+        result = []
+        for k, v in BECKHOFF_SAFETY_DEVICES.items():
+            if v.get("IsSafetyPLC", False):
+                name = v.get("name", k)
+                # 显示格式: "设备名 (Key)"
+                result.append(f"{name}")
+        return result if result else ["EL6900", "EL6910", "EL1918", "EP1918", "EP1957", "EP2918"]
+
+    @staticmethod
+    def _get_dual_mode_device_keys() -> list:
+        """获取所有双模式设备Key（同时含FSLOGIC和FSoE）"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+        return [k for k, v in BECKHOFF_SAFETY_DEVICES.items()
+                if v.get("HasFSLOGIC", False) and v.get("HasFSoE", False)]
+
+    @staticmethod
+    def _get_alias_only_device_keys() -> list:
+        """获取所有仅安全别名设备Key（规则4）"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+        result = []
+        for k, v in BECKHOFF_SAFETY_DEVICES.items():
+            has_pdo = bool(v.get("RxPdo")) or bool(v.get("TxPdo"))
+            if has_pdo and not v.get("HasFSLOGIC", False):
+                result.append(k)
+        return result
 
     # EL1918/EP系列设备的 SubType 列表（支持安全PLC双模式）
     _EL1918_LIKE_SUBTYPES = {17827710, 526206, 526245, 527206}
@@ -1582,8 +1949,8 @@ class TwinSAFEConfiguratorApp:
             self._refresh_tree()
             self._refresh_pin_tree()
 
-    def _add_el1918_as_plc_device(self):
-        """当安全PLC为EL1918/EP1918/EP1957/EP2918时，自动添加对应别名设备到TwinSafeGroup1"""
+    def _add_safety_plc_as_alias_device(self):
+        """规则2: 当安全PLC设备同时包含 FSLOGIC 和 FSoE 时，自动添加对应别名设备到TwinSafeGroup1"""
         from beckhoff_io_library import create_alias_device_from_library, BECKHOFF_SAFETY_DEVICES
         
         # 获取 TwinSafeGroup1
@@ -1597,19 +1964,44 @@ class TwinSAFEConfiguratorApp:
             messagebox.showwarning("提示", "未找到 TwinSafeGroup1，无法添加设备")
             return
         
-        # 确定当前安全PLC设备类型
-        plc_type = self.entries_target["SubType"].get() if "SubType" in self.entries_target else "EL1918"
-        if plc_type not in self._EL1918_LIKE_NAMES:
-            plc_type = "EL1918"
+        # 确定当前安全PLC设备类型（显示名称）
+        plc_display = self.entries_target["SubType"].get() if "SubType" in self.entries_target else ""
         
-        # 映射到设备库key和SubType
-        device_map = {"EL1918": ("EL1918", 17827710), "EP1918": ("EP1918", 526206), "EP1957": ("EP1957", 526245), "EP2918": ("EP2918", 527206)}
-        device_key, target_subtype = device_map.get(plc_type, ("EL1918", 17827710))
+        # 查找设备库中对应的设备Key
+        device_key = None
+        target_subtype = None
+        
+        # 精确匹配 name
+        for k, v in BECKHOFF_SAFETY_DEVICES.items():
+            if v.get("IsSafetyPLC") and v.get("IsAliasDevice"):
+                if v.get("name", "") == plc_display:
+                    device_key = k
+                    target_subtype = v.get("SubType", 0)
+                    break
+        
+        # 模糊匹配
+        if not device_key:
+            for k, v in BECKHOFF_SAFETY_DEVICES.items():
+                if v.get("IsSafetyPLC") and v.get("IsAliasDevice"):
+                    if plc_display in v.get("name", "") or plc_display in k:
+                        device_key = k
+                        target_subtype = v.get("SubType", 0)
+                        break
+        
+        # 提取型号名用于显示
+        plc_model = self._extract_model_name(plc_display)
+        
+        if not device_key:
+            # 回退到 EL1918
+            device_key = "EL1918"
+            target_subtype = 17827710
+        
+        self.log_message(f"安全PLC匹配: '{plc_model}' -> Key='{device_key}', SubType={target_subtype}")
         
         # 检查是否已存在同类型安全PLC设备
         for dev in g.AliasDevices:
             if hasattr(dev, 'SubType') and dev.SubType == target_subtype and dev.SafeAddress == 0 and dev.ConnectionType == "Local":
-                messagebox.showinfo("提示", f"TwinSafeGroup1 中已存在 {plc_type} 安全PLC设备")
+                messagebox.showinfo("提示", f"TwinSafeGroup1 中已存在 {plc_display} 安全PLC设备")
                 return
         
         # 创建设备（作为安全PLC使用，ConnectionType=Local, SafeAddress=0）
@@ -1622,7 +2014,7 @@ class TwinSAFEConfiguratorApp:
             alias_name = self._make_unique_alias(alias_name, existing_names)
         
         plc_device = create_alias_device_from_library(
-            device_key,
+            device_key,  # 使用正确的设备Key
             alias_name=alias_name,
             safe_address=0,
             connection_id=self._get_next_connection_id(),
@@ -1633,10 +2025,11 @@ class TwinSAFEConfiguratorApp:
         plc_device.ConnectionType = "Local"
         
         g.AliasDevices.append(plc_device)
+        self.current_group = g  # 设置当前组，确保引脚刷新时使用正确的组
         self._refresh_alias_tree()
         self._refresh_tree()
         self._refresh_pin_tree()
-        self.log_message(f"安全PLC为 {plc_type}，自动添加 {plc_type} 别名设备到 TwinSafeGroup1")
+        self.log_message(f"安全PLC为 {plc_model}，自动添加 {device_key} 别名设备到 TwinSafeGroup1")
 
     # ------------------------------------------------------------------
     # 结构树
@@ -1785,7 +2178,7 @@ class TwinSAFEConfiguratorApp:
         g = self._current_group()
         if not g:
             return
-        g.Name = self.entries_group["Name"].get().strip()
+        g.Name = sanitize_c_identifier(self.entries_group["Name"].get().strip())
         g.MapDiag = self.entries_group["MapDiag"].get() == "true"
         g.MapState = self.entries_group["MapState"].get() == "true"
         g.Comment = self.entries_group["Comment"].get()
@@ -1804,7 +2197,7 @@ class TwinSAFEConfiguratorApp:
                 fb = g.FunctionBlocks[sel[0]]
         if not fb:
             return
-        fb.Name = self.entries_fb["Name"].get().strip()
+        fb.Name = sanitize_c_identifier(self.entries_fb["Name"].get().strip())
         fb.MapState = self.entries_fb["MapState"].get() == "true"
         fb.MapDiag = self.entries_fb["MapDiag"].get() == "true"
         fb.Comment = self.entries_fb["Comment"].get()
@@ -1820,7 +2213,7 @@ class TwinSAFEConfiguratorApp:
         if not ok:
             messagebox.showwarning("校验失败", f"组名称{msg}")
             return
-        g.Name = new_name
+        g.Name = sanitize_c_identifier(new_name)
         g.MapDiag = self.entries_group["MapDiag"].get() == "true"
         g.MapState = self.entries_group["MapState"].get() == "true"
         g.Comment = self.entries_group["Comment"].get()
@@ -1871,7 +2264,7 @@ class TwinSAFEConfiguratorApp:
         n = 1
         while f"{prefix}{n}" in existing_names:
             n += 1
-        fb_name = f"{prefix}{n}"
+        fb_name = sanitize_c_identifier(f"{prefix}{n}")
         
         # PDF 7.2: FB ID 格式 {group}_n{network}_f{N}
         fb = FunctionBlock(
@@ -1966,7 +2359,7 @@ class TwinSAFEConfiguratorApp:
         if not ok:
             messagebox.showwarning("校验失败", f"功能块名称{msg}")
             return
-        fb.Name = new_name
+        fb.Name = sanitize_c_identifier(new_name)
         fb.MapState = self.entries_fb["MapState"].get() == "true"
         fb.MapDiag = self.entries_fb["MapDiag"].get() == "true"
         fb.Comment = self.entries_fb["Comment"].get()
@@ -1993,7 +2386,29 @@ class TwinSAFEConfiguratorApp:
             # 安全PLC设备（ConnectionType=Local, SafeAddress=0）显示 Local
             if hasattr(dev, 'ConnectionType') and dev.ConnectionType == "Local" and hasattr(dev, 'SafeAddress') and dev.SafeAddress == 0:
                 return "Local"
-            return self._SUBTYPE_MODEL_MAP.get(getattr(dev, 'SubType', 0), "未知")
+            
+            # 先从静态映射查找
+            subtype = getattr(dev, 'SubType', 0)
+            model = self._SUBTYPE_MODEL_MAP.get(subtype, None)
+            if model:
+                return model
+            
+            # 从设备库查找（支持导入的设备）
+            from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+            for key, info in BECKHOFF_SAFETY_DEVICES.items():
+                if info.get("SubType") == subtype:
+                    # 返回设备型号（去掉描述部分）
+                    name = info.get("name", "")
+                    # 提取型号（如 "EL1918" from "EL1918, 8 digital inputs (FW 2)"）
+                    model = name.split(",")[0].split(" - ")[0].strip()
+                    return model
+                # 也按 ProductCode 匹配
+                if info.get("ProductCode") and info.get("ProductCode") == getattr(dev, 'ProductCode', 0):
+                    name = info.get("name", "")
+                    model = name.split(",")[0].split(" - ")[0].strip()
+                    return model
+            
+            return "未知"
         return "-"
 
     def _refresh_alias_tree(self):
@@ -2085,6 +2500,377 @@ class TwinSAFEConfiguratorApp:
         while n in existing_safe_addrs:
             n += 1
         return n
+
+    def _parse_esi_files(self):
+        """解析 ESI 文件并自动记录安全别名设备"""
+        from tkinter import filedialog
+        import json
+        import os
+        
+        # 选择 ESI 文件（可多选）
+        filepaths = filedialog.askopenfilenames(
+            title="选择 ESI 文件",
+            filetypes=[("XML 文件", "*.xml"), ("所有文件", "*.*")],
+            initialdir=r"D:\01 work\02 PS\02 TwinSAFE\04 import export xml\Esi"
+        )
+        
+        if not filepaths:
+            return
+        
+        # 解析 ESI 文件
+        all_devices = []
+        for fp in filepaths:
+            devices = parse_esi_file(fp)
+            all_devices.extend(devices)
+        
+        if not all_devices:
+            messagebox.showinfo("解析结果", "未找到任何设备信息")
+            return
+        
+        # 去重
+        seen = set()
+        unique = []
+        for d in all_devices:
+            key = (d["name"], d["revision_no_hex"])
+            if key not in seen:
+                seen.add(key)
+                unique.append(d)
+        
+        # 筛选安全别名设备
+        alias_devices = [d for d in unique if d.get("IsAliasDevice")]
+        plc_devices = [d for d in unique if d.get("IsSafetyPLC")]
+        dual_devices = [d for d in unique if d.get("IsSafetyPLC") and d.get("IsAliasDevice")]
+        
+        # 记录到 beckhoff_io_library.py
+        added_count = self._record_devices_to_library(alias_devices)
+        
+        # 保存到 JSON 文件
+        self._save_devices_to_json(unique)
+        
+        # 显示结果
+        msg = f"解析完成！\n\n"
+        msg += f"总设备数: {len(unique)}\n"
+        msg += f"安全别名设备: {len(alias_devices)}\n"
+        msg += f"安全PLC设备: {len(plc_devices)}\n"
+        msg += f"双模式设备: {len(dual_devices)}\n"
+        msg += f"新增记录: {added_count} 个\n\n"
+        msg += f"已自动记录到设备库和 esi_devices.json\n\n"
+        msg += f"设备列表:\n"
+        
+        for d in alias_devices[:15]:
+            mode = "双模式" if d.get("IsSafetyPLC") else "仅别名"
+            msg += f"  • {d['name']} [{mode}]\n"
+        
+        if len(alias_devices) > 15:
+            msg += f"  ... 还有 {len(alias_devices) - 15} 个设备\n"
+        
+        messagebox.showinfo("ESI 解析结果", msg)
+        
+        # 刷新界面
+        self._refresh_alias_tree()
+        self.log_message(f"ESI 解析完成: {len(alias_devices)} 个安全别名设备已记录")
+
+    def _record_devices_to_library(self, devices):
+        """将解析的设备记录到设备库（内存），支持覆盖提示"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+        
+        added_count = 0
+        updated_count = 0
+        skipped_count = 0
+        
+        for d in devices:
+            name = d["name"]
+            rev = d.get("revision_no_hex", "")
+            
+            # 生成唯一 Key（使用 name 作为主键，避免重复）
+            variant_key = name
+            
+            # 检查是否已存在
+            if variant_key in BECKHOFF_SAFETY_DEVICES:
+                # 已存在，询问是否覆盖
+                result = messagebox.askyesno(
+                    "设备已存在",
+                    f"设备 '{name}' 已存在！\n\n是否覆盖？\n\n"
+                    f"点击 '是' 覆盖现有设备\n"
+                    f"点击 '否' 跳过此设备"
+                )
+                if result:
+                    # 覆盖 - 包括 PDO 数据
+                    rx_elements = d.get("rx_elements", [])
+                    tx_elements = d.get("tx_elements", [])
+                    
+                    # 转换为 beckhoff_io_library 格式
+                    rx_pdo = None
+                    if rx_elements:
+                        rx_pdo = {
+                            "BitSize": sum(int(e.get("BitLen", 1) or 1) for e in rx_elements) + 8,
+                            "Elements": []
+                        }
+                        bit_offset = 8
+                        for i, e in enumerate(rx_elements):
+                            bit_len = int(e.get("BitLen", 1) or 1)
+                            rx_pdo["Elements"].append({
+                                "Name": e.get("Name", f"Input{i+1}"),
+                                "Type": "BIT" if bit_len == 1 else "UINT" if bit_len == 16 else "USINT",
+                                "BitOffset": bit_offset,
+                                "BitSize": bit_len,
+                                "IsSafeTimer": False,
+                                "Index": e.get("Index", ""),
+                                "SubIndex": e.get("SubIndex", ""),
+                            })
+                            bit_offset += bit_len
+                    
+                    tx_pdo = None
+                    if tx_elements:
+                        tx_pdo = {
+                            "BitSize": sum(int(e.get("BitLen", 1) or 1) for e in tx_elements) + 8,
+                            "Elements": []
+                        }
+                        bit_offset = 8
+                        for i, e in enumerate(tx_elements):
+                            bit_len = int(e.get("BitLen", 1) or 1)
+                            tx_pdo["Elements"].append({
+                                "Name": e.get("Name", f"Output{i+1}"),
+                                "Type": "BIT" if bit_len == 1 else "UINT" if bit_len == 16 else "USINT",
+                                "BitOffset": bit_offset,
+                                "BitSize": bit_len,
+                                "IsSafeTimer": False,
+                                "Index": e.get("Index", ""),
+                                "SubIndex": e.get("SubIndex", ""),
+                            })
+                            bit_offset += bit_len
+                    
+                    BECKHOFF_SAFETY_DEVICES[variant_key].update({
+                        "name": d["name"],
+                        "description": d.get("description", ""),
+                        "HasFSLOGIC": d.get("HasFSLOGIC", False),
+                        "HasFSoE": d.get("HasFSoE", False),
+                        "IsSafetyPLC": d.get("IsSafetyPLC", False),
+                        "IsAliasDevice": d.get("IsAliasDevice", False),
+                        "VendorId": d.get("VendorId", 2),
+                        "ProductCode": d.get("ProductCode", 0),
+                        "RevisionNo": d.get("RevisionNo", 0),
+                        "SubType": d.get("SubType", 0),
+                        "RxPdo": rx_pdo,
+                        "TxPdo": tx_pdo,
+                    })
+                    updated_count += 1
+                else:
+                    skipped_count += 1
+            else:
+                # 新设备 - 存储完整的 PDO 信息（beckhoff_io_library 格式）
+                rx_elements = d.get("rx_elements", [])
+                tx_elements = d.get("tx_elements", [])
+                
+                # 转换为 beckhoff_io_library 格式
+                rx_pdo = None
+                if rx_elements:
+                    rx_pdo = {
+                        "BitSize": sum(int(e.get("BitLen", 1) or 1) for e in rx_elements) + 8,  # +8 for FSoE command
+                        "Elements": []
+                    }
+                    bit_offset = 8  # FSoE Command occupies bits 0-7
+                    for i, e in enumerate(rx_elements):
+                        bit_len = int(e.get("BitLen", 1) or 1)
+                        rx_pdo["Elements"].append({
+                            "Name": e.get("Name", f"Input{i+1}"),
+                            "Type": "BIT" if bit_len == 1 else "UINT" if bit_len == 16 else "USINT",
+                            "BitOffset": bit_offset,
+                            "BitSize": bit_len,
+                            "IsSafeTimer": False,
+                            "Index": e.get("Index", ""),
+                            "SubIndex": e.get("SubIndex", ""),
+                        })
+                        bit_offset += bit_len
+                
+                tx_pdo = None
+                if tx_elements:
+                    tx_pdo = {
+                        "BitSize": sum(int(e.get("BitLen", 1) or 1) for e in tx_elements) + 8,
+                        "Elements": []
+                    }
+                    bit_offset = 8
+                    for i, e in enumerate(tx_elements):
+                        bit_len = int(e.get("BitLen", 1) or 1)
+                        tx_pdo["Elements"].append({
+                            "Name": e.get("Name", f"Output{i+1}"),
+                            "Type": "BIT" if bit_len == 1 else "UINT" if bit_len == 16 else "USINT",
+                            "BitOffset": bit_offset,
+                            "BitSize": bit_len,
+                            "IsSafeTimer": False,
+                            "Index": e.get("Index", ""),
+                            "SubIndex": e.get("SubIndex", ""),
+                        })
+                        bit_offset += bit_len
+                
+                BECKHOFF_SAFETY_DEVICES[variant_key] = {
+                    "name": d["name"],
+                    "description": d.get("description", ""),
+                    "HasFSLOGIC": d.get("HasFSLOGIC", False),
+                    "HasFSoE": d.get("HasFSoE", False),
+                    "IsSafetyPLC": d.get("IsSafetyPLC", False),
+                    "IsAliasDevice": d.get("IsAliasDevice", False),
+                    "VendorId": d.get("VendorId", 2),
+                    "ProductCode": d.get("ProductCode", 0),
+                    "RevisionNo": d.get("RevisionNo", 0),
+                    "Type": 60,
+                    "SubType": d.get("SubType", 0),
+                    "ConnectionType": "FSoEMaster",
+                    "LogicType": "None",
+                    "Watchdog": 100,
+                    "SafetyParameters": [],
+                    "RxPdo": rx_pdo,
+                    "TxPdo": tx_pdo,
+                    "source_file": d.get("source_file", ""),
+                }
+                added_count += 1
+        
+        # 显示统计
+        msg = f"导入完成！\n\n"
+        msg += f"新增: {added_count} 个\n"
+        msg += f"覆盖: {updated_count} 个\n"
+        msg += f"跳过: {skipped_count} 个"
+        messagebox.showinfo("导入统计", msg)
+        
+        return added_count + updated_count
+
+    def _save_devices_to_json(self, devices):
+        """保存设备信息到 JSON 文件（追加模式）"""
+        import json
+        import os
+        
+        save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "esi_devices.json")
+        
+        # 读取现有数据
+        existing = []
+        if os.path.exists(save_path):
+            try:
+                with open(save_path, "r", encoding="utf-8") as f:
+                    existing = json.load(f)
+            except:
+                existing = []
+        
+        # 添加新设备（去重，按名称+SubType）
+        existing_keys = {(d.get("name"), d.get("SubType", 0)) for d in existing}
+        for d in devices:
+            key = (d.get("name"), d.get("SubType", 0))
+            if key not in existing_keys:
+                # 确保保存 PDO 元素数据
+                existing.append(d)
+                existing_keys.add(key)
+        
+        # 保存
+        with open(save_path, "w", encoding="utf-8") as f:
+            json.dump(existing, f, ensure_ascii=False, indent=2)
+        
+        self.log_message(f"设备信息已保存到 esi_devices.json ({len(existing)} 个设备)")
+
+    def _manage_imported_devices(self):
+        """管理导入的设备（查看、删除）"""
+        import tkinter as tk
+        from tkinter import ttk, messagebox
+        
+        # 创建管理窗口
+        dialog = tk.Toplevel(self.root)
+        dialog.title("管理导入设备")
+        dialog.geometry("800x500")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        # 主框架
+        main_frame = ttk.Frame(dialog, padding=10)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # 标题
+        ttk.Label(main_frame, text="已导入的设备列表", font=("", 12, "bold")).pack(anchor=tk.W, pady=(0, 10))
+        
+        # 设备列表（Treeview）- 仅显示设备名称
+        columns = ("name",)
+        tree = ttk.Treeview(main_frame, columns=columns, show="headings", selectmode="extended")
+        
+        tree.heading("name", text="设备名称")
+        tree.column("name", width=600)
+        
+        # 滚动条
+        scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=tree.yview)
+        tree.configure(yscrollcommand=scrollbar.set)
+        
+        tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # 加载设备数据 - 只显示 ESI 导入的设备
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+        
+        for key, info in BECKHOFF_SAFETY_DEVICES.items():
+            # 只显示通过 ESI 导入的设备（有 source_file 属性）
+            if not info.get("source_file"):
+                continue
+            
+            tree.insert("", tk.END, iid=key, values=(
+                info.get("name", key),
+                info.get("source_file", "")
+            ))
+        
+        # 按钮框架
+        btn_frame = ttk.Frame(dialog, padding=10)
+        btn_frame.pack(fill=tk.X)
+        
+        def delete_selected():
+            selected = tree.selection()
+            if not selected:
+                messagebox.showwarning("提示", "请先选择要删除的设备")
+                return
+            
+            confirm = messagebox.askyesno(
+                "确认删除",
+                f"确定要删除选中的 {len(selected)} 个设备吗？\n\n"
+                f"此操作不可恢复！"
+            )
+            if confirm:
+                for key in selected:
+                    if key in BECKHOFF_SAFETY_DEVICES:
+                        del BECKHOFF_SAFETY_DEVICES[key]
+                        tree.delete(key)
+                messagebox.showinfo("完成", f"已删除 {len(selected)} 个设备")
+                self._refresh_alias_tree()
+        
+        def delete_all_imported():
+            confirm = messagebox.askyesno(
+                "确认删除",
+                "确定要删除所有导入的设备吗？\n\n"
+                "（内置设备不会被删除）\n"
+                "此操作不可恢复！"
+            )
+            if confirm:
+                to_delete = [k for k, v in BECKHOFF_SAFETY_DEVICES.items() 
+                           if v.get("source_file")]
+                for key in to_delete:
+                    del BECKHOFF_SAFETY_DEVICES[key]
+                    if tree.exists(key):
+                        tree.delete(key)
+                messagebox.showinfo("完成", f"已删除 {len(to_delete)} 个导入设备")
+                self._refresh_alias_tree()
+        
+        def refresh_list():
+            tree.delete(*tree.get_children())
+            for key, info in BECKHOFF_SAFETY_DEVICES.items():
+                # 只显示通过 ESI 导入的设备
+                if not info.get("source_file"):
+                    continue
+                tree.insert("", tk.END, iid=key, values=(
+                    info.get("name", key),
+                    info.get("source_file", "")
+                ))
+        
+        ttk.Button(btn_frame, text="删除选中", command=delete_selected).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="删除所有导入设备", command=delete_all_imported).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="刷新", command=refresh_list).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="关闭", command=dialog.destroy).pack(side=tk.RIGHT, padx=5)
+        
+        # 统计信息
+        total = len(BECKHOFF_SAFETY_DEVICES)
+        imported = sum(1 for v in BECKHOFF_SAFETY_DEVICES.values() if v.get("source_file"))
+        ttk.Label(btn_frame, text=f"共 {total} 个设备（其中导入 {imported} 个）").pack(side=tk.RIGHT, padx=20)
 
     def _add_safety_alias(self):
         g = self._current_group()

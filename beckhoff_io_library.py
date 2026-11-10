@@ -14,6 +14,10 @@ BECKHOFF_SAFETY_DEVICES: Dict[str, Dict[str, Any]] = {
     "EL1904": {
         "name": "EL1904 - 4通道数字量安全输入",
         "description": "4通道数字量安全输入端子 (SIL3/PLe)",
+        "HasFSLOGIC": False,
+        "HasFSoE": True,
+        "IsSafetyPLC": False,
+        "IsAliasDevice": True,
         "VendorId": 2,
         "ProductCode": 125710418,
         "RevisionNo": 1114112,
@@ -51,6 +55,10 @@ BECKHOFF_SAFETY_DEVICES: Dict[str, Dict[str, Any]] = {
     "EL1918": {
         "name": "EL1918, 8 digital inputs (FW 2)",
         "description": "8通道数字量安全输入端子，带通道诊断 (SIL3/PLe)",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
         "VendorId": 2,
         "ProductCode": 125710418,
         "RevisionNo": 1114112,
@@ -155,6 +163,12 @@ BECKHOFF_SAFETY_DEVICES: Dict[str, Dict[str, Any]] = {
     "EL2904": {
         "name": "EL2904 - 4通道数字量安全输出",
         "description": "4通道数字量安全输出端子 (SIL3/PLe)",
+        "HasFSLOGIC": False,
+        "HasFSoE": True,
+        "IsSafetyPLC": False,
+        "IsAliasDevice": True,
+        "IsSafetyPLC": False,
+        "IsAliasDevice": True,
         "VendorId": 2,
         "ProductCode": 190328914,
         "RevisionNo": 1179648,
@@ -185,6 +199,10 @@ BECKHOFF_SAFETY_DEVICES: Dict[str, Dict[str, Any]] = {
     "EP1918": {
         "name": "EP1918, 8 Ch. Safety Input",
         "description": "8通道数字量安全输入端子，带通道诊断 (SIL3/PLe)",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
         "VendorId": 2,
         "Type": 60,
         "SubType": 526206,
@@ -263,6 +281,10 @@ BECKHOFF_SAFETY_DEVICES: Dict[str, Dict[str, Any]] = {
     "EP1957": {
         "name": "EP1957, 8 Ch. Safety Input, 4 Ch. Safety Output",
         "description": "8通道数字量安全输入 + 4通道数字量安全输出端子 (SIL3/PLe)",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
         "VendorId": 2,
         "Type": 60,
         "SubType": 526245,
@@ -373,6 +395,10 @@ BECKHOFF_SAFETY_DEVICES: Dict[str, Dict[str, Any]] = {
     "EP2918": {
         "name": "EP2918, 8 Ch. Safety Output",
         "description": "8通道数字量安全输出端子，带通道诊断 (SIL3/PLe)",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
         "VendorId": 2,
         "Type": 60,
         "SubType": 527206,
@@ -456,6 +482,658 @@ BECKHOFF_SAFETY_DEVICES: Dict[str, Dict[str, Any]] = {
                 {"Name": "FSOUT Module 7.ErrAck", "Type": "BIT", "BitOffset": 21, "BitSize": 1, "IsSafeTimer": False, "Index": "28770", "SubIndex": "1"},
                 {"Name": "FSOUT Module 8.Output", "Type": "BIT", "BitOffset": 22, "BitSize": 1, "IsSafeTimer": False, "Index": "28785", "SubIndex": "1"},
                 {"Name": "FSOUT Module 8.ErrAck", "Type": "BIT", "BitOffset": 23, "BitSize": 1, "IsSafeTimer": False, "Index": "28786", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    # ============================================================
+    # EJ 系列 - 双模式设备（FSLOGIC + FSoE）
+    # ============================================================
+    "EJ1914": {
+        "name": "EJ1914, 4Ch. Safety Input (FW 1)",
+        "description": "4通道数字量安全输入端子 (SIL3/PLe), EJ 系列, 旧版固件",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 125452370,
+        "RevisionNo": 1114112,
+        "Type": 60,
+        "SubType": 1914,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSIN Module 1.Channel 1.Input", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "1"},
+                {"Name": "FSIN Module 1.Channel 2.Input", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "2"},
+                {"Name": "FSIN Module 1.Module Fault", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "24578", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.Channel 1.Input", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.Channel 2.Input", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "2"},
+                {"Name": "FSIN Module 2.Module Fault", "Type": "BIT", "BitOffset": 13, "BitSize": 1, "IsSafeTimer": False, "Index": "24594", "SubIndex": "1"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSIN Module 1.ErrAck", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28674", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.ErrAck", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28690", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    "EJ1914_FW2": {
+        "name": "EJ1914, 4Ch. Safety Input (FW 2)",
+        "description": "4通道数字量安全输入端子 (SIL3/PLe), EJ 系列, 新版固件",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 125452370,
+        "RevisionNo": 1179648,
+        "Type": 60,
+        "SubType": 16779130,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSIN Module 1.Channel 1.Input", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "1"},
+                {"Name": "FSIN Module 1.Channel 2.Input", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "2"},
+                {"Name": "FSIN Module 1.Module Fault", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "24578", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.Channel 1.Input", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.Channel 2.Input", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "2"},
+                {"Name": "FSIN Module 2.Module Fault", "Type": "BIT", "BitOffset": 13, "BitSize": 1, "IsSafeTimer": False, "Index": "24594", "SubIndex": "1"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSIN Module 1.ErrAck", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28674", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.ErrAck", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28690", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    # ============================================================
+    # EJ1918 - 双模式设备
+    # ============================================================
+    "EJ1918": {
+        "name": "EJ1918, 8Ch. Safety Input (FW 1)",
+        "description": "8通道数字量安全输入端子 (SIL3/PLe), EJ 系列, 旧版固件",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 125458706,
+        "RevisionNo": 1114112,
+        "Type": 60,
+        "SubType": 1918,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 56,
+            "Elements": [
+                {"Name": "FSIN Module 1.Channel 1.Input", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "1"},
+                {"Name": "FSIN Module 1.Channel 2.Input", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "2"},
+                {"Name": "FSIN Module 1.Module Fault", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "24578", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.Channel 1.Input", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.Channel 2.Input", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "2"},
+                {"Name": "FSIN Module 2.Module Fault", "Type": "BIT", "BitOffset": 13, "BitSize": 1, "IsSafeTimer": False, "Index": "24594", "SubIndex": "1"},
+                {"Name": "FSIN Module 3.Channel 1.Input", "Type": "BIT", "BitOffset": 14, "BitSize": 1, "IsSafeTimer": False, "Index": "24609", "SubIndex": "1"},
+                {"Name": "FSIN Module 3.Channel 2.Input", "Type": "BIT", "BitOffset": 15, "BitSize": 1, "IsSafeTimer": False, "Index": "24609", "SubIndex": "2"},
+                {"Name": "FSIN Module 3.Module Fault", "Type": "BIT", "BitOffset": 16, "BitSize": 1, "IsSafeTimer": False, "Index": "24610", "SubIndex": "1"},
+                {"Name": "FSIN Module 4.Channel 1.Input", "Type": "BIT", "BitOffset": 17, "BitSize": 1, "IsSafeTimer": False, "Index": "24625", "SubIndex": "1"},
+                {"Name": "FSIN Module 4.Channel 2.Input", "Type": "BIT", "BitOffset": 18, "BitSize": 1, "IsSafeTimer": False, "Index": "24625", "SubIndex": "2"},
+                {"Name": "FSIN Module 4.Module Fault", "Type": "BIT", "BitOffset": 19, "BitSize": 1, "IsSafeTimer": False, "Index": "24626", "SubIndex": "1"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSIN Module 1.ErrAck", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28674", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.ErrAck", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28690", "SubIndex": "1"},
+                {"Name": "FSIN Module 3.ErrAck", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "28706", "SubIndex": "1"},
+                {"Name": "FSIN Module 4.ErrAck", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "28722", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    "EJ1918_FW2": {
+        "name": "EJ1918, 8Ch. Safety Input (FW 2)",
+        "description": "8通道数字量安全输入端子 (SIL3/PLe), EJ 系列, 新版固件",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 125458706,
+        "RevisionNo": 1179648,
+        "Type": 60,
+        "SubType": 16779134,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 56,
+            "Elements": [
+                {"Name": "FSIN Module 1.Channel 1.Input", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "1"},
+                {"Name": "FSIN Module 1.Channel 2.Input", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "2"},
+                {"Name": "FSIN Module 1.Module Fault", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "24578", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.Channel 1.Input", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.Channel 2.Input", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "2"},
+                {"Name": "FSIN Module 2.Module Fault", "Type": "BIT", "BitOffset": 13, "BitSize": 1, "IsSafeTimer": False, "Index": "24594", "SubIndex": "1"},
+                {"Name": "FSIN Module 3.Channel 1.Input", "Type": "BIT", "BitOffset": 14, "BitSize": 1, "IsSafeTimer": False, "Index": "24609", "SubIndex": "1"},
+                {"Name": "FSIN Module 3.Channel 2.Input", "Type": "BIT", "BitOffset": 15, "BitSize": 1, "IsSafeTimer": False, "Index": "24609", "SubIndex": "2"},
+                {"Name": "FSIN Module 3.Module Fault", "Type": "BIT", "BitOffset": 16, "BitSize": 1, "IsSafeTimer": False, "Index": "24610", "SubIndex": "1"},
+                {"Name": "FSIN Module 4.Channel 1.Input", "Type": "BIT", "BitOffset": 17, "BitSize": 1, "IsSafeTimer": False, "Index": "24625", "SubIndex": "1"},
+                {"Name": "FSIN Module 4.Channel 2.Input", "Type": "BIT", "BitOffset": 18, "BitSize": 1, "IsSafeTimer": False, "Index": "24625", "SubIndex": "2"},
+                {"Name": "FSIN Module 4.Module Fault", "Type": "BIT", "BitOffset": 19, "BitSize": 1, "IsSafeTimer": False, "Index": "24626", "SubIndex": "1"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSIN Module 1.ErrAck", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28674", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.ErrAck", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28690", "SubIndex": "1"},
+                {"Name": "FSIN Module 3.ErrAck", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "28706", "SubIndex": "1"},
+                {"Name": "FSIN Module 4.ErrAck", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "28722", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    # ============================================================
+    # EJ1957 - 双模式设备
+    # ============================================================
+    "EJ1957": {
+        "name": "EJ1957, 8Ch. Input + 4Ch. Output (FW 1)",
+        "description": "8通道安全输入 + 4通道安全输出 (SIL3/PLe), EJ 系列, 旧版固件",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 128262738,
+        "RevisionNo": 1114112,
+        "Type": 60,
+        "SubType": 1957,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 56,
+            "Elements": [
+                {"Name": "FSOUT Module.Module Fault", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24578", "SubIndex": "1"},
+                {"Name": "FSIN Module 1.Channel 1.Input", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "1"},
+                {"Name": "FSIN Module 1.Channel 2.Input", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "2"},
+                {"Name": "FSIN Module 1.Module Fault", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "24594", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.Channel 1.Input", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "24609", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.Channel 2.Input", "Type": "BIT", "BitOffset": 13, "BitSize": 1, "IsSafeTimer": False, "Index": "24609", "SubIndex": "2"},
+                {"Name": "FSIN Module 2.Module Fault", "Type": "BIT", "BitOffset": 14, "BitSize": 1, "IsSafeTimer": False, "Index": "24610", "SubIndex": "1"},
+                {"Name": "FSIN Module 3.Channel 1.Input", "Type": "BIT", "BitOffset": 15, "BitSize": 1, "IsSafeTimer": False, "Index": "24625", "SubIndex": "1"},
+                {"Name": "FSIN Module 3.Channel 2.Input", "Type": "BIT", "BitOffset": 16, "BitSize": 1, "IsSafeTimer": False, "Index": "24625", "SubIndex": "2"},
+                {"Name": "FSIN Module 3.Module Fault", "Type": "BIT", "BitOffset": 17, "BitSize": 1, "IsSafeTimer": False, "Index": "24626", "SubIndex": "1"},
+                {"Name": "FSIN Module 4.Channel 1.Input", "Type": "BIT", "BitOffset": 18, "BitSize": 1, "IsSafeTimer": False, "Index": "24641", "SubIndex": "1"},
+                {"Name": "FSIN Module 4.Channel 2.Input", "Type": "BIT", "BitOffset": 19, "BitSize": 1, "IsSafeTimer": False, "Index": "24641", "SubIndex": "2"},
+                {"Name": "FSIN Module 4.Module Fault", "Type": "BIT", "BitOffset": 20, "BitSize": 1, "IsSafeTimer": False, "Index": "24642", "SubIndex": "1"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 56,
+            "Elements": [
+                {"Name": "FSOUT Module.Channel 1.Output", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "1"},
+                {"Name": "FSOUT Module.Channel 2.Output", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "2"},
+                {"Name": "FSOUT Module.Channel 3.Output", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "3"},
+                {"Name": "FSOUT Module.Channel 4.Output", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "4"},
+                {"Name": "FSOUT Module.ErrAck", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "28674", "SubIndex": "1"},
+                {"Name": "FSIN Module 1.ErrAck", "Type": "BIT", "BitOffset": 13, "BitSize": 1, "IsSafeTimer": False, "Index": "28690", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.ErrAck", "Type": "BIT", "BitOffset": 14, "BitSize": 1, "IsSafeTimer": False, "Index": "28706", "SubIndex": "1"},
+                {"Name": "FSIN Module 3.ErrAck", "Type": "BIT", "BitOffset": 15, "BitSize": 1, "IsSafeTimer": False, "Index": "28722", "SubIndex": "1"},
+                {"Name": "FSIN Module 4.ErrAck", "Type": "BIT", "BitOffset": 16, "BitSize": 1, "IsSafeTimer": False, "Index": "28738", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    "EJ1957_FW2": {
+        "name": "EJ1957, 8Ch. Input + 4Ch. Output (FW 2)",
+        "description": "8通道安全输入 + 4通道安全输出 (SIL3/PLe), EJ 系列, 新版固件",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 128262738,
+        "RevisionNo": 1179648,
+        "Type": 60,
+        "SubType": 16779173,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 56,
+            "Elements": [
+                {"Name": "FSOUT Module.Module Fault", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24578", "SubIndex": "1"},
+                {"Name": "FSIN Module 1.Channel 1.Input", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "1"},
+                {"Name": "FSIN Module 1.Channel 2.Input", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "2"},
+                {"Name": "FSIN Module 1.Module Fault", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "24594", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.Channel 1.Input", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "24609", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.Channel 2.Input", "Type": "BIT", "BitOffset": 13, "BitSize": 1, "IsSafeTimer": False, "Index": "24609", "SubIndex": "2"},
+                {"Name": "FSIN Module 2.Module Fault", "Type": "BIT", "BitOffset": 14, "BitSize": 1, "IsSafeTimer": False, "Index": "24610", "SubIndex": "1"},
+                {"Name": "FSIN Module 3.Channel 1.Input", "Type": "BIT", "BitOffset": 15, "BitSize": 1, "IsSafeTimer": False, "Index": "24625", "SubIndex": "1"},
+                {"Name": "FSIN Module 3.Channel 2.Input", "Type": "BIT", "BitOffset": 16, "BitSize": 1, "IsSafeTimer": False, "Index": "24625", "SubIndex": "2"},
+                {"Name": "FSIN Module 3.Module Fault", "Type": "BIT", "BitOffset": 17, "BitSize": 1, "IsSafeTimer": False, "Index": "24626", "SubIndex": "1"},
+                {"Name": "FSIN Module 4.Channel 1.Input", "Type": "BIT", "BitOffset": 18, "BitSize": 1, "IsSafeTimer": False, "Index": "24641", "SubIndex": "1"},
+                {"Name": "FSIN Module 4.Channel 2.Input", "Type": "BIT", "BitOffset": 19, "BitSize": 1, "IsSafeTimer": False, "Index": "24641", "SubIndex": "2"},
+                {"Name": "FSIN Module 4.Module Fault", "Type": "BIT", "BitOffset": 20, "BitSize": 1, "IsSafeTimer": False, "Index": "24642", "SubIndex": "1"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 56,
+            "Elements": [
+                {"Name": "FSOUT Module.Channel 1.Output", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "1"},
+                {"Name": "FSOUT Module.Channel 2.Output", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "2"},
+                {"Name": "FSOUT Module.Channel 3.Output", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "3"},
+                {"Name": "FSOUT Module.Channel 4.Output", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "4"},
+                {"Name": "FSOUT Module.ErrAck", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "28674", "SubIndex": "1"},
+                {"Name": "FSIN Module 1.ErrAck", "Type": "BIT", "BitOffset": 13, "BitSize": 1, "IsSafeTimer": False, "Index": "28690", "SubIndex": "1"},
+                {"Name": "FSIN Module 2.ErrAck", "Type": "BIT", "BitOffset": 14, "BitSize": 1, "IsSafeTimer": False, "Index": "28706", "SubIndex": "1"},
+                {"Name": "FSIN Module 3.ErrAck", "Type": "BIT", "BitOffset": 15, "BitSize": 1, "IsSafeTimer": False, "Index": "28722", "SubIndex": "1"},
+                {"Name": "FSIN Module 4.ErrAck", "Type": "BIT", "BitOffset": 16, "BitSize": 1, "IsSafeTimer": False, "Index": "28738", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    # ============================================================
+    # EJ2914 - 双模式设备
+    # ============================================================
+    "EJ2914": {
+        "name": "EJ2914, 4Ch. Safety Output (FW 1)",
+        "description": "4通道数字量安全输出端子 (SIL3/PLe), EJ 系列, 旧版固件",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 193140818,
+        "RevisionNo": 1114112,
+        "Type": 60,
+        "SubType": 2914,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSOUT Module.Module Fault", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24578", "SubIndex": "1"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSOUT Module.Channel 1.Output", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "1"},
+                {"Name": "FSOUT Module.Channel 2.Output", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "2"},
+                {"Name": "FSOUT Module.Channel 3.Output", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "3"},
+                {"Name": "FSOUT Module.Channel 4.Output", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "4"},
+                {"Name": "FSOUT Module.ErrAck", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "28674", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    "EJ2914_FW2": {
+        "name": "EJ2914, 4Ch. Safety Output (FW 2)",
+        "description": "4通道数字量安全输出端子 (SIL3/PLe), EJ 系列, 新版固件",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 193140818,
+        "RevisionNo": 1179648,
+        "Type": 60,
+        "SubType": 16780130,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSOUT Module.Module Fault", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24578", "SubIndex": "1"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSOUT Module.Channel 1.Output", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "1"},
+                {"Name": "FSOUT Module.Channel 2.Output", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "2"},
+                {"Name": "FSOUT Module.Channel 3.Output", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "3"},
+                {"Name": "FSOUT Module.Channel 4.Output", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "4"},
+                {"Name": "FSOUT Module.ErrAck", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "28674", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    # ============================================================
+    # EJ2918 - 双模式设备
+    # ============================================================
+    "EJ2918": {
+        "name": "EJ2918, 8Ch. Safety Output (FW 1)",
+        "description": "8通道数字量安全输出端子 (SIL3/PLe), EJ 系列, 旧版固件",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 193141842,
+        "RevisionNo": 1114112,
+        "Type": 60,
+        "SubType": 2918,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSOUT Module 1.Module Fault", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24578", "SubIndex": "1"},
+                {"Name": "FSOUT Module 2.Module Fault", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "24594", "SubIndex": "1"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 56,
+            "Elements": [
+                {"Name": "FSOUT Module 1.Channel 1.Output", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "1"},
+                {"Name": "FSOUT Module 1.Channel 2.Output", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "2"},
+                {"Name": "FSOUT Module 1.Channel 3.Output", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "3"},
+                {"Name": "FSOUT Module 1.Channel 4.Output", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "4"},
+                {"Name": "FSOUT Module 1.ErrAck", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "28674", "SubIndex": "1"},
+                {"Name": "FSOUT Module 2.Channel 1.Output", "Type": "BIT", "BitOffset": 13, "BitSize": 1, "IsSafeTimer": False, "Index": "28689", "SubIndex": "1"},
+                {"Name": "FSOUT Module 2.Channel 2.Output", "Type": "BIT", "BitOffset": 14, "BitSize": 1, "IsSafeTimer": False, "Index": "28689", "SubIndex": "2"},
+                {"Name": "FSOUT Module 2.Channel 3.Output", "Type": "BIT", "BitOffset": 15, "BitSize": 1, "IsSafeTimer": False, "Index": "28689", "SubIndex": "3"},
+                {"Name": "FSOUT Module 2.Channel 4.Output", "Type": "BIT", "BitOffset": 16, "BitSize": 1, "IsSafeTimer": False, "Index": "28689", "SubIndex": "4"},
+                {"Name": "FSOUT Module 2.ErrAck", "Type": "BIT", "BitOffset": 17, "BitSize": 1, "IsSafeTimer": False, "Index": "28690", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    "EJ2918_FW2": {
+        "name": "EJ2918, 8Ch. Safety Output (FW 2)",
+        "description": "8通道数字量安全输出端子 (SIL3/PLe), EJ 系列, 新版固件",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 193141842,
+        "RevisionNo": 1179648,
+        "Type": 60,
+        "SubType": 16780134,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSOUT Module 1.Module Fault", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24578", "SubIndex": "1"},
+                {"Name": "FSOUT Module 2.Module Fault", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "24594", "SubIndex": "1"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 56,
+            "Elements": [
+                {"Name": "FSOUT Module 1.Channel 1.Output", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "1"},
+                {"Name": "FSOUT Module 1.Channel 2.Output", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "2"},
+                {"Name": "FSOUT Module 1.Channel 3.Output", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "3"},
+                {"Name": "FSOUT Module 1.Channel 4.Output", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "4"},
+                {"Name": "FSOUT Module 1.ErrAck", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "28674", "SubIndex": "1"},
+                {"Name": "FSOUT Module 2.Channel 1.Output", "Type": "BIT", "BitOffset": 13, "BitSize": 1, "IsSafeTimer": False, "Index": "28689", "SubIndex": "1"},
+                {"Name": "FSOUT Module 2.Channel 2.Output", "Type": "BIT", "BitOffset": 14, "BitSize": 1, "IsSafeTimer": False, "Index": "28689", "SubIndex": "2"},
+                {"Name": "FSOUT Module 2.Channel 3.Output", "Type": "BIT", "BitOffset": 15, "BitSize": 1, "IsSafeTimer": False, "Index": "28689", "SubIndex": "3"},
+                {"Name": "FSOUT Module 2.Channel 4.Output", "Type": "BIT", "BitOffset": 16, "BitSize": 1, "IsSafeTimer": False, "Index": "28689", "SubIndex": "4"},
+                {"Name": "FSOUT Module 2.ErrAck", "Type": "BIT", "BitOffset": 17, "BitSize": 1, "IsSafeTimer": False, "Index": "28690", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    # ============================================================
+    # EL2911/EL2912 - 双模式设备（单变体）
+    # ============================================================
+    "EL2911": {
+        "name": "EL2911, 4Ch. Safety I/O",
+        "description": "4通道安全输入/输出端子 (SIL3/PLe)",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 190783282,
+        "RevisionNo": 1048576,
+        "Type": 60,
+        "SubType": 2911,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSOUT Module.Module Fault", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24578", "SubIndex": "1"},
+                {"Name": "FSIN Module.Channel 1.Input", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "1"},
+                {"Name": "FSIN Module.Channel 2.Input", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "2"},
+                {"Name": "FSIN Module.Channel 3.Input", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "3"},
+                {"Name": "FSIN Module.Channel 4.Input", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "24593", "SubIndex": "4"},
+                {"Name": "FSIN Module.Module Fault", "Type": "BIT", "BitOffset": 13, "BitSize": 1, "IsSafeTimer": False, "Index": "24594", "SubIndex": "1"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSOUT Module.Output", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "1"},
+                {"Name": "FSOUT Module.ErrAck", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28674", "SubIndex": "1"},
+                {"Name": "FSIN Module.ErrAck", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "28690", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    "EL2912": {
+        "name": "EL2912, 2Ch. Safety Output 2A",
+        "description": "2通道安全输出端子 24V/2A (SIL3/PLe)",
+        "HasFSLOGIC": True,
+        "HasFSoE": True,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 190783538,
+        "RevisionNo": 1048576,
+        "Type": 60,
+        "SubType": 2912,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSOUT Module 1.Module Fault", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24578", "SubIndex": "1"},
+                {"Name": "FSOUT Module 2.Module Fault", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "24594", "SubIndex": "1"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "FSOUT Module 1.Output", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "1"},
+                {"Name": "FSOUT Module 1.ErrAck", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28674", "SubIndex": "1"},
+                {"Name": "FSOUT Module 2.Output", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "28689", "SubIndex": "1"},
+                {"Name": "FSOUT Module 2.ErrAck", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "28690", "SubIndex": "1"},
+            ]
+        },
+    },
+
+    # ============================================================
+    # 纯安全PLC设备（规则3）
+    # ============================================================
+    "EL6900": {
+        "name": "EL6900, TwinSAFE PLC",
+        "description": "TwinSAFE PLC 控制器",
+        "HasFSLOGIC": False,
+        "HasFSoE": False,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": False,
+        "VendorId": 2,
+        "ProductCode": 452042834,
+        "RevisionNo": 1048576,
+        "Type": 60,
+        "SubType": 0,
+        "ConnectionType": "Local",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": None,
+        "TxPdo": None,
+    },
+
+    "EL6910": {
+        "name": "EL6910, TwinSAFE PLC",
+        "description": "TwinSAFE PLC 控制器",
+        "HasFSLOGIC": False,
+        "HasFSoE": False,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": False,
+        "VendorId": 2,
+        "ProductCode": 452501042,
+        "RevisionNo": 1114112,
+        "Type": 60,
+        "SubType": 0,
+        "ConnectionType": "Local",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": None,
+        "TxPdo": None,
+    },
+
+    "EL6930": {
+        "name": "EL6930, TwinSAFE PLC",
+        "description": "TwinSAFE PLC 控制器",
+        "HasFSLOGIC": False,
+        "HasFSoE": False,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": False,
+        "VendorId": 2,
+        "ProductCode": 454238258,
+        "RevisionNo": 1048576,
+        "Type": 60,
+        "SubType": 0,
+        "ConnectionType": "Local",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": None,
+        "TxPdo": None,
+    },
+
+    "EJ6910": {
+        "name": "EJ6910, TwinSAFE PLC",
+        "description": "TwinSAFE PLC 控制器 (EJ 系列)",
+        "HasFSLOGIC": False,
+        "HasFSoE": False,
+        "IsSafetyPLC": True,
+        "IsAliasDevice": False,
+        "VendorId": 2,
+        "ProductCode": 452501042,
+        "RevisionNo": 1179648,
+        "Type": 60,
+        "SubType": 0,
+        "ConnectionType": "Local",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": None,
+        "TxPdo": None,
+    },
+
+    # ============================================================
+    # 仅安全别名设备（规则4，已有）
+    # ============================================================
+    "EK1914": {
+        "name": "EK1914, 2 digital inputs and 2 digital outputs",
+        "description": "2通道数字量安全输入+2通道数字量安全输出 (SIL3/PLe), EK 系列",
+        "HasFSLOGIC": False,
+        "HasFSoE": True,
+        "IsSafetyPLC": False,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 0,
+        "RevisionNo": 0,
+        "Type": 60,
+        "SubType": 65731,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "InputChannel1", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "1"},
+                {"Name": "InputChannel2", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "2"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "OutputChannel1", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "1"},
+                {"Name": "OutputChannel2", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "2"},
+            ]
+        },
+    },
+
+    "EP1908": {
+        "name": "EP1908, 8 digital inputs",
+        "description": "8通道数字量安全输入端子 (SIL3/PLe), EP 系列",
+        "HasFSLOGIC": False,
+        "HasFSoE": True,
+        "IsSafetyPLC": False,
+        "IsAliasDevice": True,
+        "VendorId": 2,
+        "ProductCode": 0,
+        "RevisionNo": 0,
+        "Type": 60,
+        "SubType": 524478,
+        "ConnectionType": "FSoEMaster",
+        "LogicType": "None",
+        "Watchdog": 100,
+        "SafetyParameters": [],
+        "RxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "InputChannel1", "Type": "BIT", "BitOffset": 8, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "1"},
+                {"Name": "InputChannel2", "Type": "BIT", "BitOffset": 9, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "2"},
+                {"Name": "InputChannel3", "Type": "BIT", "BitOffset": 10, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "3"},
+                {"Name": "InputChannel4", "Type": "BIT", "BitOffset": 11, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "4"},
+                {"Name": "InputChannel5", "Type": "BIT", "BitOffset": 12, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "5"},
+                {"Name": "InputChannel6", "Type": "BIT", "BitOffset": 13, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "6"},
+                {"Name": "InputChannel7", "Type": "BIT", "BitOffset": 14, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "7"},
+                {"Name": "InputChannel8", "Type": "BIT", "BitOffset": 15, "BitSize": 1, "IsSafeTimer": False, "Index": "24577", "SubIndex": "8"},
+            ]
+        },
+        "TxPdo": {
+            "BitSize": 48,
+            "Elements": [
+                {"Name": "Err Ack", "Type": "BIT", "BitOffset": 15, "BitSize": 1, "IsSafeTimer": False, "Index": "28673", "SubIndex": "1"},
             ]
         },
     },
