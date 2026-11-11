@@ -21,24 +21,25 @@
 
 ## 运行环境
 
-| 依赖 | 要求 |
-|------|------|
-| **Python** | 3.9+ |
-| **tkinter** | 内置（通常随 Python 一起安装） |
-| **操作系统** | Windows（推荐）/ Linux / macOS |
-| **可选** | `xmlschema` 或 `lxml`（用于完整 XSD 校验） |
+| 依赖 | 要求 | 说明 |
+|------|------|------|
+| **Python** | 3.12+ | 基础运行环境 |
+| **tkinter** | 内置 | 图形界面（随 Python 安装） |
+| **pywin32** | 312+ | TwinCAT Automation Interface（导入功能） |
+| **操作系统** | Windows | TwinCAT Automation 仅支持 Windows |
+| **TwinCAT 3 XAE** | 3.1+ | 安全项目导入目标环境 |
+| **可选** | `xmlschema` | 完整 XSD 校验 |
 
 ### 安装
 
-无需额外安装依赖，Python 自带 `tkinter` 即可运行：
-
 ```bash
-python main.py
-```
+# 基础运行（无需额外依赖）
+python gui.py
 
-如需完整 XSD 校验功能：
+# 安装 pywin32（TwinCAT Automation Interface 导入功能需要）
+pip install pywin32
 
-```bash
+# 可选：完整 XSD 校验
 pip install xmlschema
 ```
 
@@ -55,6 +56,13 @@ pip install xmlschema
 顶部工具栏提供：
 - **导入 ESI 文件**：从 ESI XML 文件导入安全设备
 - **管理导入设备**：查看/删除已导入的 ESI 设备
+
+底部工具栏提供：
+- **生成 XML**：导出 TwinCATExport XML 文件
+- **校验 XML**：校验生成的 XML 是否符合 XSD 规范
+- **解析 TwinCAT 项目**：从 .tsproj 文件提取安全设备 IoPath 信息
+- **嵌入 XML 到解决方案**：通过 Automation Interface API 将安全项目导入 TwinCAT 解决方案
+- **打开项目目录**：打开程序所在目录
 
 ### 操作流程
 
@@ -83,21 +91,19 @@ pip install xmlschema
 
 ```
 demo/
-├── main.py                 # 程序入口
-├── gui.py                  # tkinter 桌面界面
-├── config_model.py         # 项目配置数据模型
-├── beckhoff_io_library.py  # 安全 IO 设备库（内置设备）
-├── esi_parser.py           # ESI 文件解析器（Beckhoff/Hollysys/INOVANCE）
-├── esi_devices.json        # ESI 导入设备持久化存储
-├── port_library.py         # safety_ports.json 端口库封装
-├── xml_generator.py        # 按 XSD 结构生成 XML
-├── xsd_validator.py        # XSD 校验（优先 xmlschema/lxml，否则内置结构校验）
-├── json_parser.py          # 原有 JSON 解析器（保留）
-├── test_json.py            # 原有测试脚本（保留）
-├── safety_ports.json       # FB / Group 端口定义库
-├── example_project.json    # 示例项目配置（含安全IO配置）
-├── example_export.xml      # 示例生成的 XML
-└── README.md               # 本说明
+├── main.py                    # 程序入口
+├── gui.py                     # tkinter 桌面界面
+├── config_model.py            # 项目配置数据模型
+├── beckhoff_io_library.py     # 安全 IO 设备库（内置设备）
+├── esi_parser.py              # ESI 文件解析器
+├── esi_devices.json           # ESI 导入设备持久化存储
+├── port_library.py            # safety_ports.json 端口库封装
+├── xml_generator.py           # 按 XSD 结构生成 XML
+├── xsd_validator.py           # XSD 校验
+├── twincat_import_safety.py   # TwinCAT Automation Interface 导入子进程
+├── safety_ports.json          # FB / Group 端口定义库
+├── example_export.xml         # 示例生成的 XML
+└── README.md                  # 本说明
 ```
 
 ## 主要功能
@@ -169,6 +175,43 @@ demo/
 1. **作为安全 PLC**：选择为目标系统类型时，自动创建 Local 连接类型的安全别名设备（SafeAddress=0）
 2. **作为别名设备**：作为安全 IO 设备添加到组中
 
+### TwinCAT 项目解析
+
+从 `.tsproj` 文件提取安全设备的 IoPath 信息，自动创建安全别名设备：
+
+1. 点击底部 **解析 TwinCAT 项目** 按钮
+2. 选择 `.tsproj` 项目文件
+3. 弹窗显示检测到的安全设备（含 IoPath 预览）
+4. 勾选需要导入的设备，选择安全 PLC（单选）
+5. 点击确定自动创建安全别名设备
+
+**IoPath 规则：**
+- 安全 PLC IoPath（无 Module 后缀）→ `TargetSystemConfiguration`
+- 别名设备 IoPath（含 Module 后缀）→ `SafetyAliasDevice`
+- PLC 的 Local 别名设备不设置 IoPath
+
+**设备识别：**
+- 优先从 EtherCAT `Type` 属性提取型号（如 `"EL1918, 8Ch. Safety Input..."` → `EL1918`）
+- 回退到 Box 名称提取（如 `"Term 5 (EL6910)"` → `EL6910`）
+- 纯 PLC 设备（如 EL6910）显示为"仅可作为安全 PLC"
+- 未知设备显示"⚠ 未知安全设备"
+
+### 嵌入 XML 到解决方案
+
+通过 TwinCAT Automation Interface API 将安全项目直接导入 TwinCAT 解决方案：
+
+1. 点击底部 **嵌入 XML 到解决方案** 按钮
+2. 选择 TwinCAT 解决方案文件（`.sln`）
+3. 选择安全项目文件（`.xml` 或 `.tfzip`）
+4. 项目名称自动从 XML 文件读取
+5. 自动导入到解决方案的安全项目树中
+
+**技术实现：**
+- 使用 `TcXaeShell.DTE.17.0` COM 接口
+- 通过 `project.Object` 获取 `ITcSysManager`
+- 使用 `CreateChild` 方法导入安全项目
+- 子进程方式执行 COM 操作，避免 tkinter/COM 冲突
+
 ### 功能块引脚关联
 
 功能块引脚支持关联安全别名设备的通道：
@@ -215,9 +258,10 @@ demo/
 
 ## 依赖
 
-- Python 3.9+
+- Python 3.12+
 - 内置 `tkinter`
-- 可选：`xmlschema` 或 `lxml`（完整 XSD 校验）
+- `pywin32`（TwinCAT Automation Interface 导入功能）
+- 可选：`xmlschema`（完整 XSD 校验）
 
 ---
 

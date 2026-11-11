@@ -728,19 +728,19 @@ class TwinSAFEConfiguratorApp:
         self.root.bind("<Control-s>", lambda e: self._save_project())
 
     def _open_readme(self):
-        """打开 README.md 文件"""
+        """打开操作手册 PDF 文件"""
         import os
         import subprocess
-        readme_path = resource_path("README.md")
-        if os.path.exists(readme_path):
+        manual_path = resource_path("TwinSAFE操作手册.pdf")
+        if os.path.exists(manual_path):
             try:
-                os.startfile(readme_path)
+                os.startfile(manual_path)
             except AttributeError:
                 # 非 Windows 系统
-                subprocess.Popen(["open" if sys.platform == "darwin" else "xdg-open", readme_path])
-            self.log_message(f"打开说明文档: {readme_path}")
+                subprocess.Popen(["open" if sys.platform == "darwin" else "xdg-open", manual_path])
+            self.log_message(f"打开操作手册: {manual_path}")
         else:
-            messagebox.showwarning("提示", f"未找到 README.md 文件: {readme_path}")
+            messagebox.showwarning("提示", f"未找到操作手册文件: {manual_path}")
 
     def _show_about(self):
         """显示关于对话框"""
@@ -790,6 +790,8 @@ class TwinSAFEConfiguratorApp:
         bottom.pack(fill=tk.X, padx=5, pady=5)
         ttk.Button(bottom, text="生成 XML", command=self._generate_xml).pack(side=tk.LEFT, padx=5)
         ttk.Button(bottom, text="校验 XML", command=self._validate_xml).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bottom, text="解析 TwinCAT 项目", command=self._parse_twincat_project).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bottom, text="嵌入 XML 到解决方案", command=self._embed_xml_to_solution).pack(side=tk.LEFT, padx=5)
         ttk.Button(bottom, text="打开项目目录", command=self._open_project_dir).pack(side=tk.LEFT, padx=5)
 
         ttk.Label(bottom, text="作者: Will", foreground="gray").pack(side=tk.RIGHT, padx=(0, 10))
@@ -1752,6 +1754,118 @@ class TwinSAFEConfiguratorApp:
     def _open_project_dir(self):
         os.startfile(os.path.dirname(__file__) or ".")
 
+    def _embed_xml_to_solution(self):
+        """使用 Automation Interface API 将安全项目导入 TwinCAT 解决方案（子进程方式）"""
+        from tkinter import filedialog, messagebox
+        import os as _os
+        import subprocess
+        import sys
+
+        # 选择解决方案文件（.sln）
+        sln_path = filedialog.askopenfilename(
+            title="选择 TwinCAT 解决方案文件",
+            filetypes=[("解决方案", "*.sln"), ("所有文件", "*.*")]
+        )
+        if not sln_path:
+            return
+
+        # 选择要导入的安全项目文件
+        xml_path = filedialog.askopenfilename(
+            title="选择安全项目文件 (XML/TFZIP)",
+            filetypes=[("安全项目", "*.xml *.tfzip"), ("XML 文件", "*.xml"), ("TFZIP 文件", "*.tfzip"), ("所有文件", "*.*")]
+        )
+        if not xml_path:
+            return
+
+        # 从 XML 文件读取安全项目名称
+        project_name = self._extract_project_name_from_xml(xml_path)
+        if not project_name:
+            project_name = _os.path.splitext(_os.path.basename(xml_path))[0]
+
+        self.log_message("=== 导入安全项目到 TwinCAT 解决方案 ===")
+        self.log_message(f"  解决方案: {sln_path}")
+        self.log_message(f"  安全项目: {xml_path}")
+        self.log_message(f"  项目名称: {project_name}")
+
+        # 子进程脚本路径
+        script_path = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "twincat_import_safety.py")
+
+        try:
+            self.log_message("  启动导入子进程...")
+            result = subprocess.run(
+                [sys.executable, script_path, sln_path, xml_path, project_name],
+                capture_output=True, text=True, encoding="utf-8",
+                timeout=120
+            )
+
+            # 输出子进程日志
+            for line in result.stdout.splitlines():
+                self.log_message(f"  {line}")
+            if result.stderr:
+                for line in result.stderr.splitlines():
+                    self.log_message(f"  [ERR] {line}")
+
+            if "SUCCESS" in result.stdout:
+                messagebox.showinfo("成功",
+                    f"安全项目已导入到解决方案:\n\n"
+                    f"项目名称: {project_name}\n"
+                    f"源文件: {_os.path.basename(xml_path)}\n\n"
+                    f"可在 TwinCAT Safety Editor 中查看。")
+            elif "ERROR" in result.stdout or result.returncode != 0:
+                messagebox.showerror("导入失败", "导入过程中发生错误，请查看日志。")
+            else:
+                messagebox.showwarning("提示", "导入完成，请在 TwinCAT 中检查。")
+
+        except subprocess.TimeoutExpired:
+            self.log_message("  ❌ 子进程超时 (120秒)")
+            messagebox.showerror("超时", "导入操作超时，请检查 TwinCAT 是否正在运行。")
+        except Exception as e:
+            self.log_message(f"  ❌ 子进程失败: {e}")
+            messagebox.showerror("错误", f"启动导入子进程失败: {e}")
+
+    @staticmethod
+    def _extract_project_name_from_xml(xml_path):
+        """从 XML 文件中读取安全项目名称"""
+        try:
+            import xml.etree.ElementTree as ET
+            tree = ET.parse(xml_path)
+            root = tree.getroot()
+            # TwinCATExport > GeneralInformation > ProjectName
+            gi = root.find(".//GeneralInformation")
+            if gi is not None:
+                name = gi.findtext("ProjectName", "")
+                if name:
+                    return name
+            # 回退: ApplicationConfiguration > Name
+            app = root.find(".//ApplicationConfiguration")
+            if app is not None:
+                name = app.findtext("Name", "")
+                if name:
+                    return name
+        except:
+            pass
+        return ""
+
+    def _embed_xml_fallback(self, sln_path, xml_path, project_name):
+        """回退模式: 复制 XML 文件到解决方案目录"""
+        import shutil
+        import os as _os
+        from tkinter import messagebox
+
+        sln_dir = _os.path.dirname(sln_path)
+        xml_name = _os.path.basename(xml_path)
+        dest_path = _os.path.join(sln_dir, xml_name)
+
+        if _os.path.exists(dest_path):
+            if not messagebox.askyesno("确认", f"文件已存在: {xml_name}\n是否覆盖？"):
+                return
+
+        shutil.copy2(xml_path, dest_path)
+        self.log_message(f"  已复制 XML 到: {dest_path}")
+        messagebox.showinfo("成功",
+            f"XML 文件已复制到解决方案目录:\n{dest_path}\n\n"
+            f"请在 TwinCAT Safety Editor 中手动导入。")
+
     # ------------------------------------------------------------------
     # UI 同步
     # ------------------------------------------------------------------
@@ -1806,6 +1920,7 @@ class TwinSAFEConfiguratorApp:
         # 提取型号名（如 "EL1918, 8 digital inputs (FW 2)" -> "EL1918"）
         subtype_display = self.entries_target["SubType"].get() or t.SubType
         t.SubType = self._extract_model_name(subtype_display)
+        t.Type = "Hardware"  # 安全PLC的 Type 固定为 Hardware
         
         # 如果安全PLC类型变更，自动删除旧的安全PLC别名设备，添加新的
         if key == "SubType" and old_subtype != t.SubType:
@@ -2500,6 +2615,482 @@ class TwinSAFEConfiguratorApp:
         while n in existing_safe_addrs:
             n += 1
         return n
+
+
+    def _parse_twincat_project(self):
+        """解析 TwinCAT 项目文件，弹窗选择安全设备导入"""
+        from tkinter import filedialog
+        import xml.etree.ElementTree as ET
+        import os
+        import re
+
+        filepath = filedialog.askopenfilename(
+            title="选择 TwinCAT 项目文件",
+            filetypes=[("TwinCAT 项目", "*.tsproj"), ("所有文件", "*.*")]
+        )
+        if not filepath:
+            return
+
+        try:
+            tree = ET.parse(filepath)
+            root = tree.getroot()
+        except Exception as e:
+            messagebox.showerror("错误", f"解析文件失败: {e}")
+            return
+
+        # 解析设备拓扑和安全模块
+        topology = []
+        devices = []
+
+        def walk_boxes(parent, path_parts, depth):
+            for child in parent:
+                if child.tag == "Box":
+                    name = child.findtext("Name", "")
+                    if name:
+                        new_path = path_parts + [name]
+                        topology.append((depth, name))
+                        # 检查是否有 FSLOGIC（可作为安全 PLC 的标志）
+                        has_fslogic = False
+                        has_fsoe = False
+                        ec_type_str = ""  # EtherCAT Type 属性（含型号信息）
+                        for ec in child.findall("EtherCAT"):
+                            ec_type_str = ec.get("Type", "")
+                            for slot in ec.findall("Slot"):
+                                for mod in slot.findall("Module"):
+                                    mod_type = mod.get("Type", "").upper()
+                                    if mod_type == "FSLOGIC":
+                                        has_fslogic = True
+                                    elif "FSOE" in mod_type:
+                                        has_fsoe = True
+                        # 提取型号：优先从 EtherCAT Type 属性（如 "EL1918, 8Ch. Safety Input..." -> "EL1918"）
+                        model_name = self._extract_model_from_ec_type(ec_type_str, name)
+                        # 判断是否为纯安全 PLC 设备（无 FSOE 但可作 PLC）
+                        is_plc_only = (not has_fsoe) and (has_fslogic or model_name in self._PLC_ONLY_DEVICES)
+                        # 查找安全模块（FSOE/FSOES）
+                        for ec in child.findall("EtherCAT"):
+                            for slot in ec.findall("Slot"):
+                                for mod in slot.findall("Module"):
+                                    mod_type = mod.get("Type", "")
+                                    if "FSOE" in mod_type.upper() and "FSLOGIC" not in mod_type.upper():
+                                        mod_name = mod.findtext("Name", "")
+                                        mod_class = mod.get("Class", "")
+                                        # IoPath（含 Module / 不含 Module）
+                                        iopath_alias = "TIID^" + "^".join(new_path + [mod_name])
+                                        iopath_plc = "TIID^" + "^".join(new_path)
+                                        # 判断是否可作为安全 PLC
+                                        can_plc = has_fslogic or self._model_can_be_plc(model_name)
+                                        devices.append({
+                                            "box_name": name,
+                                            "model_name": model_name,
+                                            "module_name": mod_name,
+                                            "mod_type": mod_type,
+                                            "mod_class": mod_class,
+                                            "iopath_alias": iopath_alias,
+                                            "iopath_plc": iopath_plc,
+                                            "can_be_plc": can_plc,
+                                        })
+                        # 纯安全 PLC 设备（如 EL6910）：无 FSOE 模块，但可作为安全 PLC
+                        if is_plc_only and not has_fsoe:
+                            iopath_plc = "TIID^" + "^".join(new_path)
+                            devices.append({
+                                "box_name": name,
+                                "model_name": model_name,
+                                "module_name": "(无 FSOE 模块)",
+                                "mod_type": "PLC",
+                                "mod_class": "",
+                                "iopath_alias": "",  # 纯 PLC 无别名 IoPath
+                                "iopath_plc": iopath_plc,
+                                "can_be_plc": True,
+                            })
+                        walk_boxes(child, new_path, depth + 1)
+
+        # 从 EtherCAT Device 开始遍历
+        for device in root.iter("Device"):
+            dev_name = device.findtext("Name", "")
+            if "EtherCAT" in dev_name:
+                walk_boxes(device, [dev_name], 1)
+                break
+
+        if not topology:
+            # 回退：遍历所有 Box
+            def walk_all(parent, path_parts, depth):
+                for child in parent:
+                    if child.tag == "Box":
+                        name = child.findtext("Name", "")
+                        if name:
+                            new_path = path_parts + [name]
+                            topology.append((depth, name))
+                            has_fslogic = False
+                            has_fsoe = False
+                            ec_type_str = ""
+                            for ec in child.findall("EtherCAT"):
+                                ec_type_str = ec.get("Type", "")
+                                for slot in ec.findall("Slot"):
+                                    for mod in slot.findall("Module"):
+                                        mod_type = mod.get("Type", "").upper()
+                                        if mod_type == "FSLOGIC":
+                                            has_fslogic = True
+                                        elif "FSOE" in mod_type:
+                                            has_fsoe = True
+                            model_name = self._extract_model_from_ec_type(ec_type_str, name)
+                            is_plc_only = (not has_fsoe) and (has_fslogic or model_name in self._PLC_ONLY_DEVICES)
+                            for ec in child.findall("EtherCAT"):
+                                for slot in ec.findall("Slot"):
+                                    for mod in slot.findall("Module"):
+                                        mod_type = mod.get("Type", "")
+                                        if "FSOE" in mod_type.upper() and "FSLOGIC" not in mod_type.upper():
+                                            mod_name = mod.findtext("Name", "")
+                                            mod_class = mod.get("Class", "")
+                                            iopath_alias = "TIID^" + "^".join(new_path + [mod_name])
+                                            iopath_plc = "TIID^" + "^".join(new_path)
+                                            can_plc = has_fslogic or self._model_can_be_plc(model_name)
+                                            devices.append({
+                                                "box_name": name,
+                                                "model_name": model_name,
+                                                "module_name": mod_name,
+                                                "mod_type": mod_type,
+                                                "mod_class": mod_class,
+                                                "iopath_alias": iopath_alias,
+                                                "iopath_plc": iopath_plc,
+                                                "can_be_plc": can_plc,
+                                            })
+                            if is_plc_only and not has_fsoe:
+                                iopath_plc = "TIID^" + "^".join(new_path)
+                                devices.append({
+                                    "box_name": name,
+                                    "model_name": model_name,
+                                    "module_name": "(无 FSOE 模块)",
+                                    "mod_type": "PLC",
+                                    "mod_class": "",
+                                    "iopath_alias": "",
+                                    "iopath_plc": iopath_plc,
+                                    "can_be_plc": True,
+                                })
+                            walk_all(child, new_path, depth + 1)
+            walk_all(root, [], 0)
+
+        if not devices:
+            messagebox.showinfo("提示", "未找到安全模块 (FSOE/FSOES)")
+            return
+
+        self.log_message(f"解析 TwinCAT 项目: {os.path.basename(filepath)}")
+        self.log_message(f"  拓扑: {len(topology)} 个节点, 安全模块: {len(devices)} 个")
+
+        # 显示导入对话框
+        self._show_twincat_import_dialog(devices, topology, filepath)
+
+    @staticmethod
+    def _extract_model_from_ec_type(ec_type_str, box_name):
+        """从 EtherCAT Type 属性提取设备型号
+
+        优先从 EtherCAT Type 属性提取型号（如 "EL1918, 8Ch. Safety Input..." -> "EL1918"），
+        如果 Type 属性不含已知型号，则从 Box 名称提取（如 "Term 5 (EL6910)" -> "EL6910"）。
+        """
+        import re as _re
+
+        def _match_device(model):
+            """检查型号是否匹配设备库"""
+            from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+            if model in BECKHOFF_SAFETY_DEVICES:
+                return model
+            for key in BECKHOFF_SAFETY_DEVICES:
+                if key.startswith(model) or model.startswith(key):
+                    return key
+            # ESI 导入设备
+            try:
+                import json, os
+                esi_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "esi_devices.json")
+                if os.path.exists(esi_path):
+                    with open(esi_path, "r", encoding="utf-8") as f:
+                        esi_data = json.load(f)
+                    if isinstance(esi_data, list):
+                        for d in esi_data:
+                            name = d.get("name", "")
+                            if model in name or name.startswith(model):
+                                return model
+            except:
+                pass
+            return None
+
+        # 方法1: 从 EtherCAT Type 属性提取型号（如 "EL1918, 8Ch. Safety Input 24V, TwinSAFE" -> "EL1918"）
+        if ec_type_str:
+            m = _re.match(r'^([A-Za-z]+\d+[A-Za-z0-9]*)', ec_type_str.strip())
+            if m:
+                model = m.group(1)
+                matched = _match_device(model)
+                if matched:
+                    return matched
+
+        # 方法2: 从 Box 名称提取（如 "Term 5 (EL6910)" -> "EL6910"）
+        m = _re.search(r'\((\w+)\)', box_name)
+        if m:
+            model = m.group(1)
+            matched = _match_device(model)
+            if matched:
+                return matched
+            return model
+
+        # 方法3: 回退到 EtherCAT Type 提取的型号（即使不在设备库中）
+        if ec_type_str:
+            m = _re.match(r'^([A-Za-z]+\d+[A-Za-z0-9]*)', ec_type_str.strip())
+            if m:
+                return m.group(1)
+
+        return box_name
+
+    def _model_can_be_plc(self, model_name):
+        """判断设备型号是否可以作为安全 PLC"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+        # 内置设备
+        for key, info in BECKHOFF_SAFETY_DEVICES.items():
+            if key == model_name or model_name in key:
+                return info.get("IsSafetyPLC", False)
+        # ESI 导入设备
+        try:
+            import json
+            import os
+            esi_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "esi_devices.json")
+            if os.path.exists(esi_path):
+                with open(esi_path, "r", encoding="utf-8") as f:
+                    esi_data = json.load(f)
+                if isinstance(esi_data, list):
+                    for d in esi_data:
+                        if d.get("name", "").find(model_name) >= 0:
+                            return d.get("IsSafetyPLC", False)
+        except:
+            pass
+        return False
+
+    def _show_twincat_import_dialog(self, devices, topology, source_file):
+        """显示 TwinCAT 项目安全设备导入对话框"""
+        import tkinter as tk2
+        from tkinter import ttk as ttk2
+
+        dialog = tk2.Toplevel(self.root)
+        dialog.title("导入安全设备")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        dialog.resizable(True, True)
+
+        main_frame = ttk2.Frame(dialog, padding=10)
+        main_frame.pack(fill=tk2.BOTH, expand=True)
+
+        ttk2.Label(main_frame, text="勾选要导入的安全设备，可选择一个设为安全 PLC：",
+                   font=("", 10, "bold")).pack(anchor=tk2.W, pady=(0, 8))
+
+        # 可滚动区域
+        canvas = tk2.Canvas(main_frame, highlightthickness=0)
+        scrollbar = ttk2.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
+        scroll_frame = ttk2.Frame(canvas)
+        scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # 变量
+        import_vars = {}
+        plc_var = tk2.StringVar(value="")
+
+        for i, dev in enumerate(devices):
+            is_plc_only = not dev["iopath_alias"]  # 纯 PLC 设备（无 FSOE 模块）
+            box = ttk2.LabelFrame(scroll_frame, text=f"  {dev['box_name']}  ", padding=8)
+            box.pack(fill="x", pady=3, padx=3)
+
+            # 检查是否在设备库中
+            known_key = self._find_device_key(dev["model_name"])
+            is_unknown = (known_key is None)
+
+            # 第一行：导入选项 + 设备信息
+            row1 = ttk2.Frame(box)
+            row1.pack(fill="x")
+            import_vars[i] = tk2.BooleanVar(value=not is_unknown)  # 未知设备默认不导入
+            ttk2.Checkbutton(row1, text="导入", variable=import_vars[i]).pack(side="left")
+
+            info_text = f"型号: {dev['model_name']}  |  模块: {dev['module_name']}  |  Type: {dev['mod_type']}"
+            if dev['mod_class']:
+                info_text += f"  |  Class: {dev['mod_class']}"
+            if is_plc_only:
+                info_text += "  |  仅可作为安全 PLC"
+            if is_unknown:
+                info_text += "  |  ⚠ 未知安全设备"
+            color = "#c0392b" if is_unknown else "#555"
+            ttk2.Label(row1, text=info_text, foreground=color).pack(side="left", padx=10)
+
+            # 第二行：IoPath
+            if not is_plc_only:
+                row2 = ttk2.Frame(box)
+                row2.pack(fill="x", pady=(3, 0))
+                ttk2.Label(row2, text=f"IoPath: {dev['iopath_alias']}", foreground="#888",
+                           font=("", 8)).pack(side="left")
+
+            # 第三行：安全 PLC 选项
+            if dev["can_be_plc"]:
+                row3 = ttk2.Frame(box)
+                row3.pack(fill="x", pady=(3, 0))
+                ttk2.Radiobutton(row3, text="设为安全 PLC（仅能选一个）",
+                                 variable=plc_var, value=str(i)).pack(side="left")
+
+        # 按钮区域
+        btn_frame = ttk2.Frame(main_frame)
+        btn_frame.pack(fill="x", pady=(10, 0))
+
+        def on_confirm():
+            self._do_twincat_import(devices, import_vars, plc_var, dialog, source_file)
+
+        ttk2.Button(btn_frame, text="确定导入", command=on_confirm).pack(side="right", padx=5)
+        ttk2.Button(btn_frame, text="取消", command=dialog.destroy).pack(side="right")
+
+        # 窗口大小
+        dialog.update_idletasks()
+        w = min(850, dialog.winfo_screenwidth() - 100)
+        h = min(600, dialog.winfo_screenheight() - 150)
+        x = (dialog.winfo_screenwidth() - w) // 2
+        y = (dialog.winfo_screenheight() - h) // 2
+        dialog.geometry(f"{w}x{h}+{x}+{y}")
+
+    def _do_twincat_import(self, devices, import_vars, plc_var, dialog, source_file):
+        """执行 TwinCAT 安全设备导入"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES, create_alias_device_from_library
+        from config_model import SafetyAliasDevice
+        import os
+
+        g = self._current_group()
+        if not g:
+            messagebox.showwarning("提示", "请先选择一个 TwinSAFE 组")
+            return
+
+        plc_idx_str = plc_var.get()
+        plc_idx = int(plc_idx_str) if plc_idx_str else None
+
+        imported_count = 0
+        plc_model_name = None
+        plc_iopath = ""
+
+        for i, dev in enumerate(devices):
+            if not import_vars[i].get():
+                continue
+
+            is_plc = (i == plc_idx)
+            model_name = dev["model_name"]
+            box_name = dev["box_name"]
+
+            # 查找设备库中的设备 key
+            device_key = self._find_device_key(model_name)
+            if not device_key:
+                self.log_message(f"  警告: 未找到型号 '{model_name}' 的设备定义，跳过 {box_name}")
+                continue
+
+            # 纯 PLC 设备（无 FSOE 模块）：仅可作为安全 PLC，不作为别名设备
+            is_plc_only = not dev["iopath_alias"]
+            if is_plc_only and not is_plc:
+                self.log_message(f"  跳过 {box_name}：纯安全 PLC 设备，需勾选'设为安全 PLC'")
+                continue
+
+            try:
+                # 使用设备库创建基础设备
+                next_id = self._get_next_device_id()
+                next_conn_id = self._get_next_connection_id()
+
+                if is_plc:
+                    # 安全 PLC：ConnectionType=Local, SafeAddress=0, IoPath 不填（IoPath 在 TargetSystemConfiguration）
+                    dev_obj = create_alias_device_from_library(
+                        device_key, alias_name=box_name,
+                        safe_address=0, connection_id=next_conn_id,
+                        watchdog=100, device_id=next_id
+                    )
+                    dev_obj.ConnectionType = "Local"
+                    dev_obj.IoPath = ""  # Local 别名设备不填 IoPath
+                    plc_model_name = model_name
+                    plc_iopath = dev["iopath_plc"]  # 不含 Module，给 TargetSystemConfiguration
+                else:
+                    # 安全别名设备：IoPath 含 Module, AliasName = Box 名称
+                    next_safe_addr = self._get_next_safe_address()
+                    dev_obj = create_alias_device_from_library(
+                        device_key, alias_name=box_name,
+                        safe_address=next_safe_addr, connection_id=next_conn_id,
+                        watchdog=100, device_id=next_id
+                    )
+                    dev_obj.IoPath = dev["iopath_alias"]  # 含 Module
+
+                # 检查 AliasName 唯一性
+                if not self._check_alias_name_unique(g, dev_obj.AliasName):
+                    self.log_message(f"  警告: 别名 '{dev_obj.AliasName}' 已存在，跳过")
+                    continue
+
+                g.AliasDevices.append(dev_obj)
+                imported_count += 1
+                role = "安全 PLC" if is_plc else "别名设备"
+                self.log_message(f"  导入 {role}: {dev_obj.AliasName}  IoPath: {dev_obj.IoPath}")
+
+            except Exception as e:
+                self.log_message(f"  错误: 导入 {box_name} 失败: {e}")
+
+        # 更新目标系统类型（安全 PLC）
+        if plc_model_name:
+            self._update_target_system_from_plc(plc_model_name, plc_iopath)
+            self.log_message(f"  目标系统已更新为: {plc_model_name}")
+
+        dialog.destroy()
+
+        if imported_count > 0:
+            self._refresh_alias_tree()
+            self._refresh_tree()
+            self._refresh_pin_tree()
+            self.log_message(f"从 TwinCAT 项目导入了 {imported_count} 个安全设备")
+
+    def _find_device_key(self, model_name):
+        """根据型号名查找设备库 key"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+        # 精确匹配
+        if model_name in BECKHOFF_SAFETY_DEVICES:
+            return model_name
+        # 模糊匹配（如 EL1918 匹配 EL1918_FW2 不合适，用精确优先）
+        for key in BECKHOFF_SAFETY_DEVICES:
+            if key.startswith(model_name):
+                return key
+        # ESI 导入设备
+        try:
+            import json
+            import os
+            esi_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "esi_devices.json")
+            if os.path.exists(esi_path):
+                with open(esi_path, "r", encoding="utf-8") as f:
+                    esi_data = json.load(f)
+                if isinstance(esi_data, list):
+                    for d in esi_data:
+                        name = d.get("name", "")
+                        if model_name in name:
+                            return name
+        except:
+            pass
+        return None
+
+    def _update_target_system_from_plc(self, model_name, iopath=""):
+        """根据安全 PLC 型号更新目标系统配置"""
+        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
+
+        # 查找 SubType
+        subtype = None
+        for key, info in BECKHOFF_SAFETY_DEVICES.items():
+            if key == model_name or model_name in key:
+                subtype = info.get("SubType", 0)
+                break
+
+        if subtype is None:
+            return
+
+        # 更新 UI 下拉框
+        if "SubType" in self.entries_target:
+            self.entries_target["SubType"].set(model_name)
+
+        # 更新项目模型
+        t = self.project.TargetSystemConfiguration
+        if t:
+            t.SubType = subtype
+            t.Type = "Hardware"
+            if iopath:
+                t.IoPath = iopath
 
     def _parse_esi_files(self):
         """解析 ESI 文件并自动记录安全别名设备"""

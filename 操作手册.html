@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>TwinSAFE XML 配置生成器 - 操作手册</title>
+    <style>
+        @page { size: A4; margin: 2cm; }
+        body {
+            font-family: "Microsoft YaHei", "SimSun", sans-serif;
+            font-size: 11pt;
+            line-height: 1.8;
+            color: #333;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #1a5276;
+            border-bottom: 3px solid #1a5276;
+            padding-bottom: 10px;
+            font-size: 22pt;
+        }
+        h2 {
+            color: #2c3e50;
+            border-left: 5px solid #3498db;
+            padding-left: 12px;
+            margin-top: 30px;
+            font-size: 15pt;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+            font-size: 12pt;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 12pt;
+            margin-bottom: 30px;
+        }
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+        .step-number {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 24px;
+            border-radius: 50%;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+        .tip {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 10pt;
+            margin: 2px;
+        }
+        .menu-path {
+            background: #eef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .pagebreak {
+            page-break-before: always;
+        }
+        ul, ol {
+            margin: 8px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>TwinSAFE XML 配置生成器</h1>
+<p class="subtitle">软件操作手册</p>
+
+<h2>一、软件简介</h2>
+<p>本工具用于生成符合 Beckhoff TwinCAT3 Safety Editor 导出格式（TwinCATExport v0.32）的 XML 配置文件，支持安全设备配置、功能块逻辑、通道关联等功能，并提供 TwinCAT 项目解析和安全项目导入功能。</p>
+
+<div class="note">
+    <b>运行环境要求：</b>
+    <ul>
+        <li>Python 3.12+（含 tkinter）</li>
+        <li><code>pywin32</code>（TwinCAT Automation Interface 导入功能需要）</li>
+        <li>Windows 操作系统</li>
+        <li>TwinCAT 3 XAE 3.1+（导入目标环境）</li>
+    </ul>
+</div>
+<p>TwinSAFE XML 配置生成器是一款用于创建 TwinCAT3 Safety Editor 导出 XML 文件的桌面工具。通过可视化界面配置安全项目，最终导出符合 Beckhoff XSD 规范的 <code>TwinCATExport</code> XML 文件。</p>
+
+<h2>二、启动软件</h2>
+<div class="step">
+    <span class="step-number">1</span> 进入软件目录（demo 文件夹）
+</div>
+<div class="step">
+    <span class="step-number">2</span> 双击运行 <code>main.py</code> 或在命令行执行：<code>python main.py</code>
+</div>
+<div class="step">
+    <span class="step-number">3</span> 软件主界面打开后，即可开始配置
+</div>
+
+<h2>三、界面布局</h2>
+<p>软件界面由以下部分组成：</p>
+<table>
+    <tr><th>区域</th><th>说明</th></tr>
+    <tr><td>顶部工具栏</td><td>导入 ESI 文件、管理导入设备等按钮</td></tr>
+    <tr><td>底部工具栏</td><td>生成 XML、校验 XML、解析 TwinCAT 项目、嵌入 XML 到解决方案、打开项目目录</td></tr>
+    <tr><td>左侧标签页</td><td>项目信息、TwinSAFE 组、功能块、别名设备</td></tr>
+    <tr><td>右侧配置区</td><td>对应标签页的详细配置内容</td></tr>
+    <tr><td>底部日志区</td><td>显示操作日志和状态信息</td></tr>
+</table>
+
+<h2>四、基本操作流程</h2>
+
+<h3>4.1 配置项目信息</h3>
+<div class="step">
+    <span class="step-number">1</span> 点击 <b>项目信息</b> 标签页
+</div>
+<div class="step">
+    <span class="step-number">2</span> 填写 <b>项目名称</b>（必填）
+</div>
+<div class="step">
+    <span class="step-number">3</span> 填写 <b>作者</b>（可选）
+</div>
+<div class="step">
+    <span class="step-number">4</span> 选择 <b>目标系统类型</b>（如下拉选择 EL1918）
+</div>
+<div class="step">
+    <span class="step-number">5</span> 填写 <b>SafeAddress</b>（安全地址，默认 1）
+</div>
+
+<h3>4.2 创建 TwinSAFE 组</h3>
+<div class="step">
+    <span class="step-number">1</span> 点击 <b>TwinSAFE 组</b> 标签页
+</div>
+<div class="step">
+    <span class="step-number">2</span> 点击 <b>添加组</b> 按钮
+</div>
+<div class="step">
+    <span class="step-number">3</span> 在右侧配置区设置组属性：
+    <ul>
+        <li><b>组名称</b>：输入合法的 C 命名（如 TwinSafeGroup1）</li>
+        <li><b>MapDiag</b>：映射诊断信息（true/false）</li>
+        <li><b>MapState</b>：映射状态信息（true/false）</li>
+        <li><b>注释</b>：可选的文字说明</li>
+    </ul>
+</div>
+<div class="step">
+    <span class="step-number">4</span> 点击 <b>更新组</b> 保存设置
+</div>
+
+<h3>4.3 解析 ESI 设备（可选）</h3>
+<div class="tip">如果下拉框中没有需要的设备型号，可通过解析 ESI 文件的方式导入设备。</div>
+<div class="step">
+    <span class="step-number">1</span> 点击 <b>别名设备</b> 标签页
+</div>
+<div class="step">
+    <span class="step-number">2</span> 点击 <b>解析 ESI</b> 按钮
+</div>
+<div class="step">
+    <span class="step-number">3</span> 在文件选择对话框中选择 ESI XML 文件（可多选）
+</div>
+<div class="step">
+    <span class="step-number">4</span> 系统自动解析设备信息并添加到设备下拉框
+</div>
+<div class="step">
+    <span class="step-number">5</span> 如果设备已存在，会弹窗提示<b>是否覆盖</b>
+</div>
+<div class="tip">导入的设备会自动保存，下次启动软件时自动加载。</div>
+
+<h3>4.4 添加安全别名设备</h3>
+<div class="step">
+    <span class="step-number">1</span> 点击 <b>别名设备</b> 标签页
+</div>
+<div class="step">
+    <span class="step-number">2</span> 点击 <b>添加安全别名设备</b> 按钮
+</div>
+<div class="step">
+    <span class="step-number">3</span> 在弹出对话框中：
+    <ul>
+        <li>从 <b>设备型号</b> 下拉框选择设备（如 EL1918）</li>
+        <li>系统自动填充设备参数和 IO 通道</li>
+        <li>设置 <b>别名</b>（自动清理为 C 命名格式）</li>
+        <li>设置 <b>SafeAddress</b>（设备安全地址）</li>
+        <li>设置 <b>ConnectionId</b>（连接 ID）</li>
+        <li>设置 <b>Watchdog</b>（看门狗超时时间，ms）</li>
+    </ul>
+</div>
+<div class="step">
+    <span class="step-number">4</span> 点击 <b>确定</b> 完成添加
+</div>
+
+<h3>4.5 添加功能块</h3>
+<div class="step">
+    <span class="step-number">1</span> 点击 <b>功能块</b> 标签页
+</div>
+<div class="step">
+    <span class="step-number">2</span> 从 <b>FB 类型</b> 下拉框选择功能块类型（如 AND、OR、FBD 等）
+</div>
+<div class="step">
+    <span class="step-number">3</span> 点击 <b>添加功能块</b> 按钮
+</div>
+<div class="step">
+    <span class="step-number">4</span> 在右侧配置区设置 FB 属性：
+    <ul>
+        <li><b>功能块名称</b>：输入合法的 C 命名</li>
+        <li><b>MapDiag / MapState</b>：诊断和状态映射选项</li>
+        <li><b>注释</b>：可选的文字说明</li>
+    </ul>
+</div>
+<div class="step">
+    <span class="step-number">5</span> 点击 <b>更新 FB</b> 保存设置
+</div>
+
+<h3>4.6 配置引脚关联</h3>
+<div class="step">
+    <span class="step-number">1</span> 在功能块配置区的 <b>引脚配置</b> 部分
+</div>
+<div class="step">
+    <span class="step-number">2</span> 勾选需要配置的引脚（启用）
+</div>
+<div class="step">
+    <span class="step-number">3</span> 对于 <b>输入引脚</b>：
+    <ul>
+        <li>从下拉框选择关联的<b>输入通道</b>（RxPdo，设备状态）</li>
+        <li>输入<b>变量名</b>（自动清理为 C 命名格式）</li>
+    </ul>
+</div>
+<div class="step">
+    <span class="step-number">4</span> 对于 <b>输出引脚</b>：
+    <ul>
+        <li>从下拉框选择关联的<b>输出通道</b>（TxPdo，设备命令）</li>
+        <li>可多选关联多个输出通道</li>
+    </ul>
+</div>
+
+<div class="warning">通道方向说明：所有设备统一通过 ESI 的 SM 属性判断方向。SM="2" 为输出通道（FB 输出），SM="3" 为输入通道（FB 输入）。</div>
+
+<h2>五、生成 XML 文件</h2>
+<div class="step">
+    <span class="step-number">1</span> 点击底部的 <span class="btn">生成 XML</span> 按钮（或菜单 <span class="menu-path">生成 → 生成 XML</span>）
+</div>
+<div class="step">
+    <span class="step-number">2</span> 在保存对话框中选择保存路径和文件名
+</div>
+<div class="step">
+    <span class="step-number">3</span> 点击 <b>保存</b>，生成 XML 文件
+</div>
+<div class="step">
+    <span class="step-number">4</span> 底部日志区显示生成结果
+</div>
+
+<h2>六、校验 XML 文件</h2>
+<div class="step">
+    <span class="step-number">1</span> 点击顶部工具栏的 <span class="btn">校验 XML</span> 按钮
+</div>
+<div class="step">
+    <span class="step-number">2</span> 选择要校验的 XML 文件
+</div>
+<div class="step">
+    <span class="step-number">3</span> 系统自动进行 XSD 校验并显示结果
+</div>
+
+<h2>七、导入 TwinCAT Safety Editor</h2>
+<div class="step">
+    <span class="step-number">1</span> 打开 TwinCAT3 Safety Editor（TE9000 1.4.16）
+</div>
+<div class="step">
+    <span class="step-number">2</span> 使用导入功能加载生成的 XML 文件
+</div>
+<div class="step">
+    <span class="step-number">3</span> 手动完成安全设备与物理硬件的关联映射
+</div>
+<div class="step">
+    <span class="step-number">4</span> 执行安全编译（Safety Build）
+</div>
+
+<h2>八、管理导入设备</h2>
+<div class="step">
+    <span class="step-number">1</span> 点击顶部工具栏的 <span class="btn">管理导入设备</span> 按钮
+</div>
+<div class="step">
+    <span class="step-number">2</span> 在弹出窗口中查看所有 ESI 导入的设备
+</div>
+<div class="step">
+    <span class="step-number">3</span> 可执行以下操作：
+    <ul>
+        <li><b>删除选中</b>：删除选中的设备</li>
+        <li><b>删除全部导入</b>：删除所有 ESI 导入的设备</li>
+        <li><b>刷新</b>：刷新设备列表</li>
+    </ul>
+</div>
+
+<h2>九、解析 TwinCAT 项目</h2>
+<div class="step">
+    <span class="step-number">1</span> 点击底部的 <span class="btn">解析 TwinCAT 项目</span> 按钮
+</div>
+<div class="step">
+    <span class="step-number">2</span> 选择 <code>.tsproj</code> 项目文件
+</div>
+<div class="step">
+    <span class="step-number">3</span> 弹窗显示检测到的安全设备（含 IoPath 预览）
+</div>
+<div class="step">
+    <span class="step-number">4</span> 勾选需要导入的设备，选择安全 PLC（单选）
+</div>
+<div class="step">
+    <span class="step-number">5</span> 点击确定自动创建安全别名设备
+</div>
+
+<div class="note">
+    <b>IoPath 规则：</b>
+    <ul>
+        <li>安全 PLC IoPath（无 Module 后缀）→ <code>TargetSystemConfiguration</code></li>
+        <li>别名设备 IoPath（含 Module 后缀）→ <code>SafetyAliasDevice</code></li>
+        <li>PLC 的 Local 别名设备不设置 IoPath</li>
+    </ul>
+</div>
+
+<h2>十、嵌入 XML 到解决方案</h2>
+<div class="step">
+    <span class="step-number">1</span> 点击底部的 <span class="btn">嵌入 XML 到解决方案</span> 按钮
+</div>
+<div class="step">
+    <span class="step-number">2</span> 选择 TwinCAT 解决方案文件（<code>.sln</code>）
+</div>
+<div class="step">
+    <span class="step-number">3</span> 选择安全项目文件（<code>.xml</code> 或 <code>.tfzip</code>）
+</div>
+<div class="step">
+    <span class="step-number">4</span> 项目名称自动从 XML 文件读取，确认导入
+</div>
+
+<div class="note">
+    <b>环境要求：</b>
+    <ul>
+        <li>安装 <code>pywin32</code>（<code>pip install pywin32</code>）</li>
+        <li>TwinCAT 3 XAE 已安装并运行</li>
+        <li>解决方案中包含 TwinCAT Safety 项目</li>
+    </ul>
+</div>
+
+<h2>十一、保存/打开项目</h2>
+<div class="step">
+    <span class="step-number">1</span> 保存项目：菜单 <span class="menu-path">文件 → 保存项目 JSON</span>
+</div>
+<div class="step">
+    <span class="step-number">2</span> 打开项目：菜单 <span class="menu-path">文件 → 打开项目 JSON</span>
+</div>
+
+<h2>十二、命名规则说明</h2>
+<p>所有名称字段（别名、组名、功能块名、变量名）会自动清理为合法的 C 语言命名格式：</p>
+<table>
+    <tr><th>规则</th><th>说明</th><th>示例</th></tr>
+    <tr><td>非法字符替换</td><td>非字母、数字、下划线的字符自动转为 <code>_</code></td><td><code>InoSV680S-FSoE</code> → <code>InoSV680S_FSoE</code></td></tr>
+    <tr><td>合并下划线</td><td>连续多个下划线合并为一个</td><td><code>a__b</code> → <code>a_b</code></td></tr>
+    <tr><td>去除首尾下划线</td><td>首尾的下划线自动去除</td><td><code>_name_</code> → <code>name</code></td></tr>
+    <tr><td>数字开头</td><td>数字开头自动添加 <code>_</code> 前缀</td><td><code>123abc</code> → <code>_123abc</code></td></tr>
+</table>
+
+<h2>十三、常见问题</h2>
+
+<h3>Q1: 生成的 XML 导入 TwinCAT 后编译报错？</h3>
+<p>A: 本工具不校验功能块逻辑，仅保证格式正确。请根据编译提示检查功能块配置和通道关联。</p>
+
+<h3>Q2: 设备下拉框没有我要的设备？</h3>
+<p>A: 可在 <b>别名设备</b> 页面点击 <b>解析 ESI</b> 按钮，导入设备的 ESI 文件，导入后设备会出现在下拉框中。</p>
+
+<h3>Q3: 通道方向不正确？</h3>
+<p>A: 通道方向由 ESI 文件中的 SM 属性决定。SM="2" 为输出（FB 输出），SM="3" 为输入（FB 输入）。如方向不正确，请检查 ESI 文件。</p>
+
+<h3>Q4: 名称被自动修改了？</h3>
+<p>A: 这是 C 命名规则自动清理功能，将非法字符转为下划线，确保名称符合安全工程要求。</p>
+
+<h2>十四、支持的设备型号</h2>
+<table>
+    <tr><th>型号</th><th>描述</th></tr>
+    <tr><td>EL1904</td><td>4通道数字量安全输入</td></tr>
+    <tr><td>EL2904</td><td>4通道数字量安全输出</td></tr>
+    <tr><td>EL1918</td><td>8通道数字量安全输入</td></tr>
+    <tr><td>EL2911</td><td>4通道安全输入 + 1通道安全输出</td></tr>
+    <tr><td>EL2912</td><td>2通道安全输出 2A</td></tr>
+    <tr><td>EP1918</td><td>8通道数字量安全输入</td></tr>
+    <tr><td>EP1957</td><td>8通道安全输入 + 4通道安全输出</td></tr>
+    <tr><td>EP2918</td><td>8通道安全输出</td></tr>
+    <tr><td>EJ1914</td><td>4通道安全输入（EJ 系列）</td></tr>
+    <tr><td>EJ1918</td><td>8通道安全输入（EJ 系列）</td></tr>
+    <tr><td>EJ1957</td><td>8通道安全输入 + 4通道安全输出（EJ 系列）</td></tr>
+    <tr><td>EJ2914</td><td>4通道安全输出（EJ 系列）</td></tr>
+    <tr><td>EJ2918</td><td>8通道安全输出（EJ 系列）</td></tr>
+    <tr><td>EK1914</td><td>2通道安全输入 + 2通道安全输出</td></tr>
+</table>
+
+</body>
+</html>

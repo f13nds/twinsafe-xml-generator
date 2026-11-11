@@ -116,7 +116,8 @@ class TwinSAFEXmlGenerator:
             "IsExternal": "true" if tsc.IsExternal else "false",
         })
         _sub(tsc_el, "SafeAddress", tsc.SafeAddress)
-        # IoPath 不生成
+        if tsc.IoPath:
+            _sub(tsc_el, "IoPath", tsc.IoPath)
         if tsc.ProductCode is not None:
             _sub(tsc_el, "ProductCode", tsc.ProductCode)
         if tsc.RevisionNo is not None:
