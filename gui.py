@@ -1917,7 +1917,7 @@ class TwinSAFEConfiguratorApp:
         except ValueError:
             pass
         old_subtype = t.SubType
-        # 提取型号名（如 "EL1918, 8 digital inputs (FW 2)" -> "EL1918"）
+        # SubType 使用型号名字符串（如 "EL6910"、"EL1918"）
         subtype_display = self.entries_target["SubType"].get() or t.SubType
         t.SubType = self._extract_model_name(subtype_display)
         t.Type = "Hardware"  # 安全PLC的 Type 固定为 Hardware
@@ -2674,6 +2674,7 @@ class TwinSAFEConfiguratorApp:
                                     if "FSOE" in mod_type.upper() and "FSLOGIC" not in mod_type.upper():
                                         mod_name = mod.findtext("Name", "")
                                         mod_class = mod.get("Class", "")
+                                        mod_data = mod.findtext("ModuleData", "")  # ModuleIdent 在字节 4-7
                                         # IoPath（含 Module / 不含 Module）
                                         iopath_alias = "TIID^" + "^".join(new_path + [mod_name])
                                         iopath_plc = "TIID^" + "^".join(new_path)
@@ -2685,6 +2686,7 @@ class TwinSAFEConfiguratorApp:
                                             "module_name": mod_name,
                                             "mod_type": mod_type,
                                             "mod_class": mod_class,
+                                            "mod_data": mod_data,
                                             "iopath_alias": iopath_alias,
                                             "iopath_plc": iopath_plc,
                                             "can_be_plc": can_plc,
@@ -2904,20 +2906,24 @@ class TwinSAFEConfiguratorApp:
             # 第一行：导入选项 + 设备信息
             row1 = ttk2.Frame(box)
             row1.pack(fill="x")
-            import_vars[i] = tk2.BooleanVar(value=not is_unknown)  # 未知设备默认不导入
-            ttk2.Checkbutton(row1, text="导入", variable=import_vars[i]).pack(side="left")
 
-            info_text = f"型号: {dev['model_name']}  |  模块: {dev['module_name']}  |  Type: {dev['mod_type']}"
+            if is_plc_only:
+                # 纯 PLC 设备：不显示导入选项，仅提供 PLC 选项
+                import_vars[i] = tk2.BooleanVar(value=False)
+                info_text = f"型号: {dev['model_name']}  |  仅可作为安全 PLC（无 I/O 通道）"
+            else:
+                import_vars[i] = tk2.BooleanVar(value=not is_unknown)  # 未知设备默认不导入
+                ttk2.Checkbutton(row1, text="导入", variable=import_vars[i]).pack(side="left")
+                info_text = f"型号: {dev['model_name']}  |  模块: {dev['module_name']}  |  Type: {dev['mod_type']}"
+
             if dev['mod_class']:
                 info_text += f"  |  Class: {dev['mod_class']}"
-            if is_plc_only:
-                info_text += "  |  仅可作为安全 PLC"
             if is_unknown:
                 info_text += "  |  ⚠ 未知安全设备"
             color = "#c0392b" if is_unknown else "#555"
             ttk2.Label(row1, text=info_text, foreground=color).pack(side="left", padx=10)
 
-            # 第二行：IoPath
+            # 第二行：IoPath（纯 PLC 设备不显示）
             if not is_plc_only:
                 row2 = ttk2.Frame(box)
                 row2.pack(fill="x", pady=(3, 0))
@@ -2968,23 +2974,25 @@ class TwinSAFEConfiguratorApp:
         plc_iopath = ""
 
         for i, dev in enumerate(devices):
-            if not import_vars[i].get():
-                continue
-
             is_plc = (i == plc_idx)
+            is_plc_only = not dev["iopath_alias"]  # 纯 PLC 设备（无 FSOE 模块）
+
+            # 纯 PLC 设备：仅当被选为安全 PLC 时才处理
+            if is_plc_only:
+                if not is_plc:
+                    continue  # 未选为 PLC，跳过
+            else:
+                # 普通设备：需要勾选导入
+                if not import_vars[i].get():
+                    continue
+
             model_name = dev["model_name"]
             box_name = dev["box_name"]
 
             # 查找设备库中的设备 key
-            device_key = self._find_device_key(model_name)
+            device_key = self._find_device_key(model_name, dev.get("mod_class", ""), dev.get("mod_data", ""))
             if not device_key:
                 self.log_message(f"  警告: 未找到型号 '{model_name}' 的设备定义，跳过 {box_name}")
-                continue
-
-            # 纯 PLC 设备（无 FSOE 模块）：仅可作为安全 PLC，不作为别名设备
-            is_plc_only = not dev["iopath_alias"]
-            if is_plc_only and not is_plc:
-                self.log_message(f"  跳过 {box_name}：纯安全 PLC 设备，需勾选'设为安全 PLC'")
                 continue
 
             try:
@@ -2993,16 +3001,30 @@ class TwinSAFEConfiguratorApp:
                 next_conn_id = self._get_next_connection_id()
 
                 if is_plc:
-                    # 安全 PLC：ConnectionType=Local, SafeAddress=0, IoPath 不填（IoPath 在 TargetSystemConfiguration）
-                    dev_obj = create_alias_device_from_library(
-                        device_key, alias_name=box_name,
-                        safe_address=0, connection_id=next_conn_id,
-                        watchdog=100, device_id=next_id
-                    )
-                    dev_obj.ConnectionType = "Local"
-                    dev_obj.IoPath = ""  # Local 别名设备不填 IoPath
+                    # 安全 PLC：更新 TargetSystemConfiguration
                     plc_model_name = model_name
                     plc_iopath = dev["iopath_plc"]  # 不含 Module，给 TargetSystemConfiguration
+                    self.log_message(f"  设置安全 PLC: {model_name}  IoPath: {plc_iopath}")
+                    self.log_message(f"  [DEBUG] dev[iopath_plc] = '{dev.get('iopath_plc', 'NOT FOUND')}'")
+
+                    # 双模式设备（有 FSoE 模块）作为安全 PLC 时，创建 Local 别名设备
+                    if dev["iopath_alias"]:  # 有 FSoE 模块 = 双模式设备
+                        dev_obj = create_alias_device_from_library(
+                            device_key, alias_name=box_name,
+                            safe_address=0, connection_id=next_conn_id,
+                            watchdog=100, device_id=next_id
+                        )
+                        dev_obj.ConnectionType = "Local"
+                        dev_obj.IoPath = ""  # Local 别名设备不填 IoPath
+                        if not self._check_alias_name_unique(g, dev_obj.AliasName):
+                            self.log_message(f"  警告: 别名 '{dev_obj.AliasName}' 已存在，跳过")
+                            continue
+                        g.AliasDevices.append(dev_obj)
+                        imported_count += 1
+                        self.log_message(f"  导入安全 PLC 别名设备: {dev_obj.AliasName} (Local)")
+                    else:
+                        self.log_message(f"  纯安全 PLC 设备，无 I/O 通道")
+                    continue
                 else:
                     # 安全别名设备：IoPath 含 Module, AliasName = Box 名称
                     next_safe_addr = self._get_next_safe_address()
@@ -3012,6 +3034,8 @@ class TwinSAFEConfiguratorApp:
                         watchdog=100, device_id=next_id
                     )
                     dev_obj.IoPath = dev["iopath_alias"]  # 含 Module
+                    # 强制设置为 FSoEMaster（双模式设备库默认可能是 Local）
+                    dev_obj.ConnectionType = "FSoEMaster"
 
                 # 检查 AliasName 唯一性
                 if not self._check_alias_name_unique(g, dev_obj.AliasName):
@@ -3039,13 +3063,45 @@ class TwinSAFEConfiguratorApp:
             self._refresh_pin_tree()
             self.log_message(f"从 TwinCAT 项目导入了 {imported_count} 个安全设备")
 
-    def _find_device_key(self, model_name):
-        """根据型号名查找设备库 key"""
+    def _find_device_key(self, model_name, mod_class="", mod_data=""):
+        """根据型号名和 ModuleIdent 查找设备库 key
+
+        优先通过 ModuleIdent (从 ModuleData 提取) 匹配 SubType（精确区分 FW 版本），
+        再通过 ModuleClass 匹配，最后通过型号名匹配。
+        """
         from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
-        # 精确匹配
+
+        # 1. 通过 ModuleIdent 精确匹配 SubType（区分 FW 版本）
+        # ModuleIdent 在 ModuleData 的字节 4-7（小端序）
+        mod_ident = None
+        if mod_data and len(mod_data) >= 8:
+            try:
+                hex_str = mod_data[:16]  # 前8字节的hex
+                b = bytes.fromhex(hex_str)
+                mod_ident = int.from_bytes(b[4:8], byteorder='little')
+            except (ValueError, TypeError):
+                pass
+
+        if mod_ident:
+            for key, info in BECKHOFF_SAFETY_DEVICES.items():
+                if info.get("SubType") == mod_ident:
+                    return key
+
+        # 2. 通过 ModuleClass 匹配（备用）
+        if mod_class:
+            try:
+                cls_val = int(mod_class, 0)
+                for key, info in BECKHOFF_SAFETY_DEVICES.items():
+                    if info.get("SubType") == cls_val:
+                        return key
+            except (ValueError, TypeError):
+                pass
+
+        # 3. 通过型号名精确匹配
         if model_name in BECKHOFF_SAFETY_DEVICES:
             return model_name
-        # 模糊匹配（如 EL1918 匹配 EL1918_FW2 不合适，用精确优先）
+
+        # 4. 通过型号名模糊匹配
         for key in BECKHOFF_SAFETY_DEVICES:
             if key.startswith(model_name):
                 return key
@@ -3068,29 +3124,22 @@ class TwinSAFEConfiguratorApp:
 
     def _update_target_system_from_plc(self, model_name, iopath=""):
         """根据安全 PLC 型号更新目标系统配置"""
-        from beckhoff_io_library import BECKHOFF_SAFETY_DEVICES
-
-        # 查找 SubType
-        subtype = None
-        for key, info in BECKHOFF_SAFETY_DEVICES.items():
-            if key == model_name or model_name in key:
-                subtype = info.get("SubType", 0)
-                break
-
-        if subtype is None:
-            return
-
+        self.log_message(f"  [DEBUG] _update_target_system_from_plc: model={model_name}, iopath={iopath}")
+        
         # 更新 UI 下拉框
         if "SubType" in self.entries_target:
             self.entries_target["SubType"].set(model_name)
 
-        # 更新项目模型
+        # 更新项目模型 - SubType 使用型号名字符串
         t = self.project.TargetSystemConfiguration
         if t:
-            t.SubType = subtype
+            t.SubType = model_name  # 型号名字符串（如 "EL6910"、"EL1918"）
             t.Type = "Hardware"
             if iopath:
                 t.IoPath = iopath
+                self.log_message(f"  [DEBUG] IoPath 已设置: {t.IoPath}")
+            else:
+                self.log_message(f"  [DEBUG] IoPath 为空，未设置")
 
     def _parse_esi_files(self):
         """解析 ESI 文件并自动记录安全别名设备"""
